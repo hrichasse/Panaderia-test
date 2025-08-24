@@ -414,7 +414,7 @@ function initApp() {
             navLinks.insertBefore(li, navLinks.lastElementChild || null);
         }
     } catch (err) {
-        console.error('initApp error:', err);
+        console.error('initApp error:', err); 
     }
 }
 
