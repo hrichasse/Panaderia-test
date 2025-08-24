@@ -1,0 +1,36 @@
+<!-- ...new file (cart sidebar + modal login) -->
+<aside id="cartSidebar" class="cart-sidebar" aria-hidden="true">
+    <div class="cart-header">
+        <h3>Tu Carrito</h3>
+        <button class="close-cart" onclick="toggleCart()">×</button>
+    </div>
+    <div class="cart-content">
+        <div id="cartItems"><p>Tu carrito está vacío</p></div>
+
+        <div class="cart-total">
+            <p>Total: $<span id="cartTotal">0</span></p>
+        </div>
+
+        <div class="discount-input">
+            <input id="discountCode" placeholder="Código de descuento" />
+            <button onclick="applyDiscount()">Aplicar</button>
+        </div>
+
+        <button class="checkout-btn" onclick="checkout()">Pagar</button>
+    </div>
+</aside>
+
+<!-- Login Modal -->
+<div id="loginModal" class="modal" role="dialog" aria-modal="true" style="display:none">
+    <div class="modal-content">
+        <button class="close-modal" onclick="closeModal('loginModal')">×</button>
+        <h3>Iniciar Sesión</h3>
+        <form id="loginForm">
+            <label for="loginEmail">Email</label>
+            <input id="loginEmail" type="email" required />
+            <label for="birthDate">Fecha de Nacimiento</label>
+            <input id="birthDate" type="date" />
+            <button type="submit">Entrar</button>
+        </form>
+    </div>
+</div>

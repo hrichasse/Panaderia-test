@@ -60,11 +60,72 @@ async function includeSections() {
 
 // Función que inicializa la app (antes estaba en DOMContentLoaded)
 function initApp() {
-    // ...aquí va todo el código que inicializa la UI, displayProducts(), listeners, etc...
-    // por ejemplo:
+    // Inicialización segura después de includeSections()
     displayProducts(products);
     updateCartDisplay();
-    // ...resto de listeners...
+
+    // Login form listener (solo si existe en el DOM)
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) {
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const birthDate = document.getElementById('birthDate').value;
+
+            if (birthDate) {
+                userAge = checkAgeDiscount(birthDate);
+            }
+
+            if (email.includes('@duocuc.cl')) {
+                showToast('¡Estudiante de Duoc detectado! Torta gratis en tu cumpleaños.', 'success');
+            }
+
+            closeModal('loginModal');
+            showToast('Sesión iniciada correctamente', 'success');
+        });
+    }
+
+    // Añadir botón de login al nav, solo si existe .nav-links
+    const navLinks = document.querySelector('.nav-links');
+    if (navLinks) {
+        const loginButton = document.createElement('li');
+        loginButton.innerHTML = `<a href="#" onclick="openModal('loginModal')">Iniciar Sesión</a>`;
+        if (navLinks.lastElementChild) navLinks.insertBefore(loginButton, navLinks.lastElementChild);
+        else navLinks.appendChild(loginButton);
+    }
+
+    // Smooth scrolling (seguro ahora que las secciones están incluidas)
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({ block: 'start' });
+            }
+        });
+    });
+
+    // Click fuera del carrito (comprueba existencia de elementos)
+    document.addEventListener('click', function(e) {
+        const cartSidebar = document.getElementById('cartSidebar');
+        const cartIcon = document.querySelector('.cart-icon');
+        if (cartSidebar && cartIcon && !cartSidebar.contains(e.target) && !cartIcon.contains(e.target) && cartSidebar.classList.contains('open')) {
+            toggleCart();
+        }
+    });
+
+    // Cerrar modales clic fuera (ya existía)
+    window.addEventListener('click', function(e) {
+        const modals = document.querySelectorAll('.modal');
+        modals.forEach(modal => {
+            if (e.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+    });
+
+    // Animación en scroll
+    window.addEventListener('scroll', animateOnScroll);
 }
 
 // Initialize the page
@@ -101,20 +162,16 @@ function displayProducts(productsToShow) {
 }
 
 // Filter products
-function filterProducts(category) {
+function filterProducts(category, btnEl) {
     currentFilter = category;
-    
-    // Update filter buttons
+
+    // Actualiza botones (protege si no existen)
     document.querySelectorAll('.filter-btn').forEach(btn => {
-        if (btn.dataset.category === category) {
-            btn.classList.add('active');
-        } else {
-            btn.classList.remove('active');
-        }
+        if (btn === btnEl) btn.classList.add('active');
+        else btn.classList.remove('active');
     });
 
-    // Filter and display products
-    let filteredProducts = category === 'todos' ? products : products.filter(product => product.category === category);
+    const filteredProducts = category === 'todos' ? products : products.filter(p => p.category === category);
     displayProducts(filteredProducts);
 }
 
@@ -218,9 +275,9 @@ function applyDiscount() {
 function checkAgeDiscount(birthDate) {
     const today = new Date();
     const birth = new Date(birthDate);
-    let age = today.getFullYear() - birth.getFullYear();
+    let age = today.getFullYear() - birth.getFullYear(); // let en vez de const
     const monthDiff = today.getMonth() - birth.getMonth();
-    
+
     if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
         age--;
     }
@@ -280,25 +337,6 @@ function closeModal(modalId) {
     document.getElementById(modalId).style.display = 'none';
 }
 
-// Login form handling
-document.getElementById('loginForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const email = document.getElementById('loginEmail').value;
-    const birthDate = document.getElementById('birthDate').value;
-
-    if (birthDate) {
-        userAge = checkAgeDiscount(birthDate);
-    }
-
-    // Check if it's a Duoc student email
-    if (email.includes('@duocuc.cl')) {
-        showToast('¡Estudiante de Duoc detectado! Torta gratis en tu cumpleaños.', 'success');
-    }
-
-    closeModal('loginModal');
-    showToast('Sesión iniciada correctamente', 'success');
-});
-
 // Smooth scrolling for navigation links
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
@@ -347,8 +385,43 @@ function animateOnScroll() {
 
 window.addEventListener('scroll', animateOnScroll);
 
-// Add login button to navigation (for demonstration)
-const navLinks = document.querySelector('.nav-links');
-const loginButton = document.createElement('li');
-loginButton.innerHTML = '<a href="#" onclick="openModal(\'loginModal\')">Iniciar Sesión</a>';
-navLinks.insertBefore(loginButton, navLinks.lastElementChild);
+// Inicialización segura: solo cuando el DOM y las secciones están presentes
+function initApp() {
+    try {
+        if (typeof displayProducts === 'function') displayProducts(products);
+        if (typeof updateCartDisplay === 'function') updateCartDisplay();
+
+        // Adjuntar listeners que dependan del DOM solo si existen
+        const loginForm = document.getElementById('loginForm');
+        if (loginForm) {
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const email = document.getElementById('loginEmail')?.value || '';
+                const birthDate = document.getElementById('birthDate')?.value || '';
+                if (birthDate) userAge = checkAgeDiscount(birthDate);
+                if (email.includes('@duocuc.cl')) showToast('¡Estudiante de Duoc detectado! Torta gratis en tu cumpleaños.', 'success');
+                closeModal('loginModal');
+                showToast('Sesión iniciada correctamente', 'success');
+            });
+        }
+
+        // Añadir login al nav si existe
+        const navLinks = document.querySelector('.nav-links');
+        if (navLinks && !navLinks.querySelector('.login-added')) {
+            const li = document.createElement('li');
+            li.className = 'login-added';
+            li.innerHTML = `<a href="#" onclick="openModal('loginModal')">Iniciar Sesión</a>`;
+            navLinks.insertBefore(li, navLinks.lastElementChild || null);
+        }
+    } catch (err) {
+        console.error('initApp error:', err);
+    }
+}
+
+// Ejecutar initApp cuando esté listo (compatible con include.js que inyecta este archivo)
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initApp);
+} else {
+    // Si se carga después de incluir secciones
+    setTimeout(initApp, 10);
+}
