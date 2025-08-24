@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pastelería Mil Sabores - Tradición y Calidad</title>
+    <title>Pastelería Mil Sabores - Tortas, Postres y Repostería Artesanal en Chile</title>
+    <meta name="description" content="Pastelería Mil Sabores ofrece tortas, postres individuales, productos sin azúcar, sin gluten y veganos de alta calidad. ¡Más de 50 años de tradición en repostería chilena!">
+    <meta name="keywords" content="pastelería, tortas, postres, repostería, sin azúcar, sin gluten, vegano, Chile, Santiago, cumpleaños, bodas, artesanal">
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -27,11 +29,17 @@
     <!-- About Section -->
     <div data-include="sections/about.html"></div>
 
+    <!-- Testimonials Section (NUEVA) -->
+    <div data-include="sections/testimonials.html"></div>
+
     <!-- Categories Section -->
     <div data-include="sections/categories.html"></div>
 
     <!-- Products Section -->
     <div data-include="sections/products.html"></div>
+
+    <!-- FAQ Section (NUEVA) -->
+    <div data-include="sections/faq.html"></div>
 
     <!-- Cart Sidebar -->
     <div data-include="sections/cart.html"></div>
@@ -39,7 +47,22 @@
     <!-- Footer Section -->
     <div data-include="sections/footer.html"></div>
 
-    <!-- include.js carga las secciones y luego inyecta js/main.js -->
+    <!-- Login Modal (NUEVO) -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('loginModal')">&times;</span>
+            <h2>Iniciar Sesión / Registrarse</h2>
+            <form id="loginForm">
+                <label for="loginEmail">Correo Electrónico:</label>
+                <input type="email" id="loginEmail" required>
+                <label for="birthDate">Fecha de Nacimiento (opcional para descuentos):</label>
+                <input type="date" id="birthDate">
+                <button type="submit">Entrar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- main.js ahora maneja la inclusión de secciones y la lógica de la app -->
     <script src="js/main.js" defer></script>
 </body>
 </html>
