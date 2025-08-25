@@ -1,24 +1,21 @@
-<!-- ...new file (cart sidebar + modal login) -->
-<aside id="cartSidebar" class="cart-sidebar" aria-hidden="true">
-    <div class="cart-header">
-        <h3>Tu Carrito</h3>
-        <button class="close-cart" onclick="toggleCart()">×</button>
+<section id="cartSidebar" class="cart-sidebar" aria-hidden="true">
+  <div class="cart-header">
+    <h3>Tu Carrito</h3>
+    <button class="close-cart" aria-label="Cerrar carrito">×</button>
+  </div>
+  <div class="cart-content">
+    <div id="cartItems"><p>Tu carrito está vacío</p></div>
+    <div class="discount-input">
+      <input id="discountCode" placeholder="Código de descuento">
+      <button id="applyDiscountBtn">Aplicar</button>
     </div>
-    <div class="cart-content">
-        <div id="cartItems"><p>Tu carrito está vacío</p></div>
-
-        <div class="cart-total">
-            <p>Total: $<span id="cartTotal">0</span></p>
-        </div>
-
-        <div class="discount-input">
-            <input id="discountCode" placeholder="Código de descuento" />
-            <button onclick="applyDiscount()">Aplicar</button>
-        </div>
-
-        <button class="checkout-btn" onclick="checkout()">Pagar</button>
+    <div class="cart-total">
+      <h4>Total: $<span id="cartTotal">0</span></h4>
+      <button id="checkoutBtn" class="checkout-btn">Proceder al Pago</button>
     </div>
-</aside>
+  </div>
+</section>
+
 
 <!-- Login Modal -->
 <div id="loginModal" class="modal" role="dialog" aria-modal="true" style="display:none">

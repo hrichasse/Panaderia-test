@@ -339,52 +339,62 @@ function updateCartDisplay() {
     cartTotal.textContent = total.toLocaleString();
 }
 
-// Toggle cart
-function toggleCart() {
-    const cartSidebar = document.getElementById('cartSidebar');
-    if (cartSidebar) {
-        cartSidebar.classList.toggle('open');
-    }
-}
-
-// Apply discount
-function applyDiscount() {
-    const discountCodeInput = document.getElementById('discountCode');
-    if (!discountCodeInput) {
-        showToast('Error: Elemento de código de descuento no encontrado.', 'error');
+// Toggle cart robusto y accesible
+function toggleCart(forceOpen) {
+    const cartSidebar = document.getElementById('cartSidebar') || document.querySelector('.cart-sidebar');
+    if (!cartSidebar) {
+        console.error('toggleCart: #cartSidebar no encontrado');
         return;
     }
-    const discountCode = discountCodeInput.value.toUpperCase();
-    
-    if (discountCode === 'FELICES50') {
-        discountApplied = true;
-        discountPercentage = 10;
-        updateCartDisplay();
-        showToast('Descuento del 10% aplicado!', 'success');
-    } else {
-        showToast('Código de descuento inválido', 'error');
-    }
+    const isOpen = cartSidebar.classList.contains('open');
+    const shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : !isOpen;
+    cartSidebar.classList.toggle('open', shouldOpen);
+    cartSidebar.setAttribute('aria-hidden', String(!shouldOpen));
 }
 
-// Check age discount
-function checkAgeDiscount(birthDate) {
-    const today = new Date();
-    const birth = new Date(birthDate);
-    let age = today.getFullYear() - birth.getFullYear();
-    const monthDiff = today.getMonth() - birth.getMonth();
-    
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-        age--;
-    }
+// Asegura que los listeners del icono y botón funcionen incluso si se agregan dinámicamente
+function setupCartBehavior() {
+    // Delegación para el icono de carrito (funciona aunque se agregue después)
+    document.addEventListener('click', (e) => {
+        const icon = e.target.closest && e.target.closest('.cart-icon');
+        if (icon) {
+            e.preventDefault();
+            toggleCart();
+        }
+    });
 
-    if (age >= 50) {
-        discountApplied = true;
-        discountPercentage = 50;
-        updateCartDisplay();
-        showToast('Descuento del 50% por edad aplicado!', 'success');
-    }
+    // Botón cerrar en sidebar
+    document.addEventListener('click', (e) => {
+        const close = e.target.closest && e.target.closest('.close-cart');
+        if (close) {
+            e.preventDefault();
+            toggleCart(false);
+        }
+    });
 
-    return age;
+    // Actualiza visual del carrito en caso de cambios de estado
+    updateCartDisplay(); // asegura que items y contador se sincronicen
+}
+
+// Asegura que funciones usadas por handlers inline existan globalmente
+window.toggleCart = toggleCart;
+window.addToCart = addToCart;
+window.removeFromCart = removeFromCart;
+window.updateQuantity = updateQuantity;
+window.applyDiscount = applyDiscount;
+window.checkout = checkout;
+window.openModal = openModal;
+window.closeModal = closeModal;
+
+// Inicialización segura: llamar desde initApp() después de incluir secciones
+// Si ya tienes initApp(), añade dentro: setupCartBehavior(); updateCartDisplay();
+if (typeof initApp === 'function') {
+    const originalInit = initApp;
+    initApp = function(...args) {
+        originalInit.apply(this, args);
+        try { setupCartBehavior(); } catch (e) { console.error(e); }
+        try { updateCartDisplay(); } catch (e) { console.error(e); }
+    };
 }
 
 // Checkout
@@ -470,3 +480,27 @@ function setupFaqToggle() {
         });
     });
 }
+
+// Al final del archivo: exponer y sincronizar
+window.cart = window.cart || [];
+window.addToCart = window.addToCart || function(id){
+  const p = (window.products || products || []).find(x=>x.id===id); if(!p) return;
+  const ex = window.cart.find(i=>i.id===id);
+  if(ex) ex.quantity++; else window.cart.push({...p, quantity:1});
+  if(typeof updateCartDisplay==='function') updateCartDisplay();
+  if(typeof toggleCart==='function') toggleCart(true);
+};
+window.toggleCart = window.toggleCart || function(force){
+  const cs = document.getElementById('cartSidebar') || document.querySelector('.cart-sidebar');
+  if(!cs) return console.warn('toggleCart: sidebar no encontrado');
+  const open = typeof force==='boolean' ? force : !cs.classList.contains('open');
+  cs.classList.toggle('open', open);
+  cs.setAttribute('aria-hidden', String(!open));
+};
+window.updateCartDisplay = window.updateCartDisplay || function(){
+  const el = document.getElementById('cartItems'); if(!el) return;
+  if(window.cart.length===0) el.innerHTML='<p>Tu carrito está vacío</p>';
+  else el.innerHTML = window.cart.map(i=>`<div>${i.name} x${i.quantity}</div>`).join('');
+  const ct = document.getElementById('cartTotal'); if(ct) ct.textContent = window.cart.reduce((s,i)=>s+i.price*i.quantity,0).toLocaleString();
+  const cc = document.querySelector('.cart-count'); if(cc) cc.textContent = window.cart.reduce((s,i)=>s+i.quantity,0);
+};
