@@ -85,6 +85,43 @@ document.addEventListener('DOMContentLoaded', async () => {
     initApp(); // Luego inicializa la aplicación
 });
 
+// Inicializar acordeón FAQ (llamar después de incluir secciones / en initApp)
+function initFAQ() {
+    const faqQuestions = document.querySelectorAll('.faq .faq-question');
+    if (!faqQuestions || faqQuestions.length === 0) return;
+
+    faqQuestions.forEach(q => {
+        q.setAttribute('role', 'button');
+        q.setAttribute('tabindex', '0');
+        q.addEventListener('click', function (e) {
+            e.stopPropagation(); // evita que handlers globales interfieran
+            const item = q.closest('.faq-item');
+            if (!item) return;
+            item.classList.toggle('open');
+            const answer = item.querySelector('.faq-answer');
+            if (answer) {
+                // accesibilidad
+                const isOpen = item.classList.contains('open');
+                q.setAttribute('aria-expanded', String(isOpen));
+                answer.style.display = isOpen ? 'block' : 'none';
+            }
+        });
+
+        q.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                q.click();
+            }
+        });
+
+        // inicializar estado cerrado
+        const item = q.closest('.faq-item');
+        const answer = item && item.querySelector('.faq-answer');
+        if (answer) answer.style.display = item.classList.contains('open') ? 'block' : 'none';
+        q.setAttribute('aria-expanded', String(!!item && item.classList.contains('open')));
+    });
+}
+
 // Centraliza los event listeners
 function setupEventListeners() {
     // Toggle cart
