@@ -944,13 +944,27 @@ footer {
     font-size: 0.95rem;
 }
 
-.faq-answer.show {
+/* Forzar visibilidad de respuestas FAQ */
+.faq details .faq-answer {
+    display: none;
+    padding-top: 0.5rem;
+    color: #5D4037; /* texto visible */
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* Mostrar respuesta cuando el details esté abierto */
+.faq details[open] .faq-answer {
     display: block;
 }
 
-/* Media query para el formulario de newsletter en pantallas grandes */
-@media (min-width: 769px) {
-    .newsletter-form {
-        flex-direction: row; /* Vuelve a la fila en pantallas grandes */
-    }
+/* Asegurar que el summary no oculte el contenido por overflow/altura */
+.faq details {
+    overflow: visible;
+}
+
+/* Ajuste para transiciones suaves (opcional) */
+.faq details .faq-answer {
+  transition: opacity .18s ease, transform .18s ease;
+  opacity: 1;
 }

@@ -87,39 +87,46 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // Inicializar acordeón FAQ (llamar después de incluir secciones / en initApp)
 function initFAQ() {
-    const faqQuestions = document.querySelectorAll('.faq .faq-question');
-    if (!faqQuestions || faqQuestions.length === 0) return;
+  // mejora accesibilidad para summaries
+  document.querySelectorAll('.faq summary').forEach(summary => {
+    summary.setAttribute('role', 'button');
+    summary.setAttribute('tabindex', '0');
 
-    faqQuestions.forEach(q => {
-        q.setAttribute('role', 'button');
-        q.setAttribute('tabindex', '0');
-        q.addEventListener('click', function (e) {
-            e.stopPropagation(); // evita que handlers globales interfieran
-            const item = q.closest('.faq-item');
-            if (!item) return;
-            item.classList.toggle('open');
-            const answer = item.querySelector('.faq-answer');
-            if (answer) {
-                // accesibilidad
-                const isOpen = item.classList.contains('open');
-                q.setAttribute('aria-expanded', String(isOpen));
-                answer.style.display = isOpen ? 'block' : 'none';
-            }
-        });
-
-        q.addEventListener('keydown', function (e) {
-            if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                q.click();
-            }
-        });
-
-        // inicializar estado cerrado
-        const item = q.closest('.faq-item');
-        const answer = item && item.querySelector('.faq-answer');
-        if (answer) answer.style.display = item.classList.contains('open') ? 'block' : 'none';
-        q.setAttribute('aria-expanded', String(!!item && item.classList.contains('open')));
+    // keyboard (Enter / Space)
+    summary.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        summary.click();
+      }
     });
+  });
+
+  // Capturing handler: ejecuta el toggle antes que handlers globales y evita que los detengan
+  document.addEventListener('click', function captureFAQClick(e) {
+    const s = e.target.closest && e.target.closest('.faq summary');
+    if (!s) return;
+    // prevenir que otros handlers bloqueen el comportamiento nativo
+    try {
+      const details = s.closest('details');
+      if (!details) return;
+      // Toggle manual para garantizar apertura/cierre
+      details.open = !details.open;
+      // impedir propagación adicional que pueda cancelar la acción
+      e.stopImmediatePropagation();
+      e.preventDefault && e.preventDefault();
+    } catch (err) {
+      console.error('initFAQ capture handler error', err);
+    }
+  }, true); // use capture phase so runs before bubble handlers
+}
+
+// Asegura llamada segura tras carga de secciones (include.js inyecta main.js después)
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(initFAQ, 50);
+  });
+} else {
+  setTimeout(initFAQ, 50);
 }
 
 // Centraliza los event listeners
@@ -520,7 +527,7 @@ function setupFaqToggle() {
 
 // Al final del archivo: exponer y sincronizar
 window.cart = window.cart || [];
-window.addToCart = window.addToCart || function(id){
+window.addToCart = addToCart || function(id){
   const p = (window.products || products || []).find(x=>x.id===id); if(!p) return;
   const ex = window.cart.find(i=>i.id===id);
   if(ex) ex.quantity++; else window.cart.push({...p, quantity:1});
