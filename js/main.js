@@ -1,6 +1,4 @@
-// JavaScript code for the Pastelería Mil Sabores web application
-
-// Product data
+//tortas ricas
 const products = [
     // Tortas Cuadradas
     { id: 1, name: "Torta Cuadrada de Chocolate", price: 45000, category: "tortas-cuadradas", description: "Deliciosa torta de chocolate con capas de ganache y un toque de avellanas. Personalizable con mensajes especiales.", image: "images/torta-chocolate.jpg" },
@@ -35,7 +33,7 @@ const products = [
     { id: 16, name: "Torta Especial de Boda", price: 60000, category: "especiales", description: "Elegante y deliciosa, esta torta está diseñada para ser el centro de atención en cualquier boda.", image: "images/torta-boda.jpg" }
 ];
 
-// Cart functionality
+// funcionalidad del carro
 let cart = [];
 let currentFilter = 'todos';
 let discountApplied = false;
@@ -70,10 +68,21 @@ function initApp() {
     currentProductIndex = 0;
     loadMoreProducts(); // Carga los primeros productos
 
+    // Asegurar que el comportamiento del carrito se configure siempre (delegación + listeners)
+    try {
+        setupCartBehavior && setupCartBehavior();
+    } catch (err) {
+        console.error('initApp: error al ejecutar setupCartBehavior', err);
+    }
+
     updateCartDisplay();
     setupEventListeners(); // Centraliza todos los event listeners
     setupFaqToggle(); // Configura el acordeón de FAQ
     animateOnScroll(); // Llama una vez al cargar para los elementos visibles inicialmente
+
+    // Debug: informar si existen los elementos esperados
+    console.debug('initApp: cart icon existe?', !!document.querySelector('.cart-icon'));
+    console.debug('initApp: cart sidebar existe?', !!getCartSidebar());
 }
 
 // Initialize the page - DOMContentLoaded ahora solo llama a includeSections y luego a initApp
@@ -131,14 +140,28 @@ if (document.readyState === 'loading') {
 
 // Centraliza los event listeners
 function setupEventListeners() {
-    // Toggle cart
+    // Toggle cart (buscar icono, no asumir que existe un id exacto para el sidebar)
     const cartIcon = document.querySelector('.cart-icon');
     if (cartIcon) {
-        cartIcon.addEventListener('click', toggleCart);
+        cartIcon.addEventListener('click', function(e) {
+            // prevenir comportamiento por defecto (en caso de <a href="#">)
+            if (e && typeof e.preventDefault === 'function') e.preventDefault();
+            // no stopPropagation para no bloquear otros handlers globales
+            const cs = getCartSidebar();
+            if (!cs) {
+                console.warn('click cart-icon: sidebar no encontrado');
+                return;
+            }
+            toggleCart();
+        });
     }
+
     const closeCartBtn = document.querySelector('.close-cart');
     if (closeCartBtn) {
-        closeCartBtn.addEventListener('click', toggleCart);
+        closeCartBtn.addEventListener('click', function(e) {
+            if (e && typeof e.preventDefault === 'function') e.preventDefault();
+            toggleCart(false);
+        });
     }
 
     // Apply discount
@@ -191,12 +214,13 @@ function setupEventListeners() {
 
     // Close cart when clicking outside
     document.addEventListener('click', function(e) {
-        const cartSidebar = document.getElementById('cartSidebar');
-        const cartIcon = document.querySelector('.cart-icon');
+        const cartSidebar = getCartSidebar();
+        const cartIconEl = document.querySelector('.cart-icon');
         
-        // Asegúrate de que el clic no sea dentro del carrito ni en el icono del carrito
-        if (cartSidebar && cartIcon && !cartSidebar.contains(e.target) && !cartIcon.contains(e.target) && cartSidebar.classList.contains('open')) {
-            toggleCart();
+        if (!cartSidebar) return;
+        // Si el sidebar está abierto y el clic NO fue dentro del sidebar ni sobre el icono, cerrarlo
+        if (cartSidebar.classList.contains('open') && !cartSidebar.contains(e.target) && !(cartIconEl && cartIconEl.contains(e.target))) {
+            toggleCart(false);
         }
     });
 
@@ -383,41 +407,39 @@ function updateCartDisplay() {
     cartTotal.textContent = total.toLocaleString();
 }
 
-// Toggle cart robusto y accesible
+// Función helper: buscar el sidebar con varios selectores comunes
+function getCartSidebar() {
+    const sel = [
+        '#cartSidebar',
+        '#cart-sidebar',
+        '.cart-sidebar',
+        '.cartSidebar',
+        '[data-cart-sidebar]'
+    ];
+    for (const s of sel) {
+        const found = document.querySelector(s);
+        if (found) {
+            // log para depuración
+            console.debug(`getCartSidebar: encontrado con selector "${s}"`);
+            return found;
+        }
+    }
+    console.debug('getCartSidebar: no se encontró sidebar con selectores esperados');
+    return null;
+}
+
+// Toggle cart robusto y accesible (con logging)
 function toggleCart(forceOpen) {
-    const cartSidebar = document.getElementById('cartSidebar') || document.querySelector('.cart-sidebar');
+    const cartSidebar = getCartSidebar();
     if (!cartSidebar) {
-        console.error('toggleCart: #cartSidebar no encontrado');
+        console.error('toggleCart: sidebar no encontrado. Asegúrate que el HTML incluya el template de cart con algún selector compatible.');
         return;
     }
     const isOpen = cartSidebar.classList.contains('open');
     const shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : !isOpen;
     cartSidebar.classList.toggle('open', shouldOpen);
     cartSidebar.setAttribute('aria-hidden', String(!shouldOpen));
-}
-
-// Asegura que los listeners del icono y botón funcionen incluso si se agregan dinámicamente
-function setupCartBehavior() {
-    // Delegación para el icono de carrito (funciona aunque se agregue después)
-    document.addEventListener('click', (e) => {
-        const icon = e.target.closest && e.target.closest('.cart-icon');
-        if (icon) {
-            e.preventDefault();
-            toggleCart();
-        }
-    });
-
-    // Botón cerrar en sidebar
-    document.addEventListener('click', (e) => {
-        const close = e.target.closest && e.target.closest('.close-cart');
-        if (close) {
-            e.preventDefault();
-            toggleCart(false);
-        }
-    });
-
-    // Actualiza visual del carrito en caso de cambios de estado
-    updateCartDisplay(); // asegura que items y contador se sincronicen
+    console.debug(`toggleCart: sidebar ${shouldOpen ? 'abierto' : 'cerrado'}`);
 }
 
 // Asegura que funciones usadas por handlers inline existan globalmente
@@ -430,15 +452,33 @@ window.checkout = checkout;
 window.openModal = openModal;
 window.closeModal = closeModal;
 
-// Inicialización segura: llamar desde initApp() después de incluir secciones
-// Si ya tienes initApp(), añade dentro: setupCartBehavior(); updateCartDisplay();
-if (typeof initApp === 'function') {
-    const originalInit = initApp;
-    initApp = function(...args) {
-        originalInit.apply(this, args);
-        try { setupCartBehavior(); } catch (e) { console.error(e); }
-        try { updateCartDisplay(); } catch (e) { console.error(e); }
-    };
+// Asegura que los listeners del icono y botón funcionen incluso si se agregan dinámicamente
+function setupCartBehavior() {
+    // Delegación para el icono de carrito (funciona aunque se agregue después)
+    document.addEventListener('click', (e) => {
+        const icon = e.target.closest && e.target.closest('.cart-icon');
+        if (icon) {
+            if (e && typeof e.preventDefault === 'function') e.preventDefault();
+            const cs = getCartSidebar();
+            if (!cs) {
+                console.warn('delegated cart-icon click: sidebar no encontrado');
+                return;
+            }
+            toggleCart();
+        }
+    });
+
+    // Botón cerrar en sidebar (delegado)
+    document.addEventListener('click', (e) => {
+        const close = e.target.closest && e.target.closest('.close-cart');
+        if (close) {
+            if (e && typeof e.preventDefault === 'function') e.preventDefault();
+            toggleCart(false);
+        }
+    });
+
+    // Sincroniza visual del carrito
+    updateCartDisplay();
 }
 
 // Checkout
@@ -546,5 +586,4 @@ window.updateCartDisplay = window.updateCartDisplay || function(){
   if(window.cart.length===0) el.innerHTML='<p>Tu carrito está vacío</p>';
   else el.innerHTML = window.cart.map(i=>`<div>${i.name} x${i.quantity}</div>`).join('');
   const ct = document.getElementById('cartTotal'); if(ct) ct.textContent = window.cart.reduce((s,i)=>s+i.price*i.quantity,0).toLocaleString();
-  const cc = document.querySelector('.cart-count'); if(cc) cc.textContent = window.cart.reduce((s,i)=>s+i.quantity,0);
 };
