@@ -1,11 +1,11 @@
 /* Variables de color para fácil mantenimiento */
 :root {
     --primary-bg-color: #FFF5E1; /* Crema Pastel */
-    --primary-text-color: #5D4037; /* Marrón Oscuro */
+    --primary-text-color: #5D4037; /* Marrón color boliviano */
     --accent-pink: #FFC0CB; /* Rosa Suave */
-    --accent-pink-hover: #FFB3BA; /* Rosa Suave para hover */
-    --accent-chocolate: #8B4513; /* Chocolate */
-    --accent-chocolate-hover: #A0522D; /* Chocolate para hover */
+    --accent-pink-hover: #FFB3BA; /* Rosa Suave */
+    --accent-chocolate: #8B4513; /* Chocolate 5x1000*/
+    --accent-chocolate-hover: #A0522D; /* Chocolate rico */
     --secondary-text-color: #B0BEC5; /* Gris Claro */
     --white: #FFFFFF;
     --black: #000000;
@@ -19,7 +19,7 @@ body {
     background-color: var(--primary-bg-color);
     color: var(--primary-text-color);
     line-height: 1.6;
-    margin: 0; /* Asegura que no haya márgenes por defecto del body */
+    margin: 0; /* sin margen*/
     padding: 0;
 }
 
@@ -58,7 +58,7 @@ nav {
     list-style: none;
     gap: 2rem;
     align-items: center;
-    margin: 0; /* Elimina el margen por defecto de la lista */
+    margin: 0; /* Eliminamos el margen por defecto de la lista */
     padding: 0;
 }
 
