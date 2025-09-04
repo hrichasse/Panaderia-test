@@ -293,19 +293,25 @@ function displayProducts(productsToRender, append = false) {
 
 // Load more products functionality
 function loadMoreProducts() {
-    const productsToLoad = currentFilteredProducts.slice(currentProductIndex, currentProductIndex + productsPerPage);
-    displayProducts(productsToLoad, true); // Añadir productos
-    currentProductIndex += productsToLoad.length;
-    
     const loadMoreBtn = document.getElementById('loadMoreBtn');
+
+    // Si no estamos mostrando todos los productos, restablecemos el filtro
+    if (currentFilter !== 'todos') {
+        filterProducts('todos'); // Esto reinicia también el índice y muestra primeros productos
+        return; // Esperamos a que filterProducts haga el trabajo
+    }
+
+    // Si ya estamos en "todos", simplemente cargamos todos los productos restantes
+    const productsToLoad = currentFilteredProducts.slice(currentProductIndex);
+    displayProducts(productsToLoad, true); // Mostrar todos los productos restantes
+    currentProductIndex += productsToLoad.length;
+
+    // Ocultar el botón, ya que no queda nada por mostrar
     if (loadMoreBtn) {
-        if (currentProductIndex < currentFilteredProducts.length) {
-            loadMoreBtn.classList.remove('hidden');
-        } else {
-            loadMoreBtn.classList.add('hidden'); // Ocultar si no hay más productos
-        }
+        loadMoreBtn.classList.add('hidden');
     }
 }
+
 
 // Filter products
 function filterProducts(category) {
