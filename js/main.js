@@ -246,10 +246,33 @@ function setupEventListeners() {
         navLinks.insertBefore(loginButton, navLinks.lastElementChild);
     }
 
-    // Listener para el botón "Cargar Más"
+    // Listener para el botón "Cargar Más" (reemplazado por una versión única, simple y resistente)
     const loadMoreBtn = document.getElementById('loadMoreBtn');
     if (loadMoreBtn) {
-        loadMoreBtn.addEventListener('click', loadMoreProducts);
+        // click
+        loadMoreBtn.addEventListener('click', function (e) {
+            if (e && typeof e.preventDefault === 'function') e.preventDefault();
+            e.stopPropagation && e.stopPropagation();
+            // evita clicks múltiples rápidos
+            if (loadMoreBtn.disabled) return;
+            loadMoreBtn.disabled = true;
+            try {
+                loadMoreProducts();
+            } catch (err) {
+                console.error('Error en loadMoreProducts desde listener:', err);
+            } finally {
+                // reactivar botón tras pequeña demora para evitar duplicados
+                setTimeout(() => loadMoreBtn.disabled = false, 300);
+            }
+        });
+
+        // keyboard (Enter / Space)
+        loadMoreBtn.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                this.click();
+            }
+        });
     }
 
     // Filter buttons (delegación de eventos para asegurar que funcionen después de la carga)
@@ -291,20 +314,63 @@ function displayProducts(productsToRender, append = false) {
     });
 }
 
-// Load more products functionality
+// Load more products functionality (mejorada para revelar tarjetas ocultas si existen)
 function loadMoreProducts() {
-    const productsToLoad = currentFilteredProducts.slice(currentProductIndex, currentProductIndex + productsPerPage);
-    displayProducts(productsToLoad, true); // Añadir productos
-    currentProductIndex += productsToLoad.length;
-    
+    const productGrid = document.getElementById('productGrid');
+    if (!productGrid) return;
+
+    // Helper para detectar elementos ocultos por varias técnicas
+    function isHiddenCard(el) {
+        if (!el) return false;
+        const computed = window.getComputedStyle(el);
+        return el.hasAttribute('hidden') ||
+               el.classList.contains('hidden') ||
+               el.classList.contains('d-none') ||
+               computed.display === 'none' ||
+               computed.visibility === 'hidden' ||
+               el.offsetParent === null;
+    }
+
+    // 1) Buscar tarjetas ocultas en DOM por diferentes señales
+    const allCards = Array.from(productGrid.querySelectorAll('.product-card'));
+    const hiddenCards = allCards.filter(isHiddenCard);
+
+    if (hiddenCards.length > 0) {
+        for (let i = 0; i < Math.min(productsPerPage, hiddenCards.length); i++) {
+            const card = hiddenCards[i];
+            // Quitar atributos/estilos que la ocultan
+            card.removeAttribute('hidden');
+            card.classList.remove('hidden', 'd-none', 'fade-out');
+            card.style.display = '';
+            card.style.visibility = '';
+            card.setAttribute('aria-hidden', 'false');
+            // Añadir animación de entrada
+            card.classList.add('fade-in');
+        }
+        // No incrementamos currentProductIndex aquí porque suponemos que esos elementos ya contaban en el DOM.
+    } else {
+        // 2) Si no hay tarjetas ocultas, cargamos el siguiente lote desde los datos
+        const productsToLoad = currentFilteredProducts.slice(currentProductIndex, currentProductIndex + productsPerPage);
+        if (productsToLoad.length > 0) {
+            displayProducts(productsToLoad, true); // Añadir productos
+            currentProductIndex += productsToLoad.length;
+        }
+    }
+
+    // 3) Actualizar visibilidad del botón
     const loadMoreBtn = document.getElementById('loadMoreBtn');
     if (loadMoreBtn) {
-        if (currentProductIndex < currentFilteredProducts.length) {
+        // Mostrar el botón si aún hay productos por cargar desde datos o si hay tarjetas ocultas en DOM
+        const remainingFromData = currentProductIndex < currentFilteredProducts.length;
+        const stillHiddenInDOM = Array.from(productGrid.querySelectorAll('.product-card')).some(isHiddenCard);
+        if (remainingFromData || stillHiddenInDOM) {
             loadMoreBtn.classList.remove('hidden');
         } else {
             loadMoreBtn.classList.add('hidden'); // Ocultar si no hay más productos
         }
     }
+
+    console.debug('loadMoreProducts: index', currentProductIndex, 'total', currentFilteredProducts.length);
 }
 
 // Filter products
