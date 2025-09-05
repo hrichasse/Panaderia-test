@@ -386,7 +386,6 @@ function filterProducts(category) {
         }
     });
 
-    // Filter products and reset index
     currentFilteredProducts = category === 'todos' ? products : products.filter(product => product.category === category);
     currentProductIndex = 0; // Reiniciar el índice al filtrar
     
