@@ -293,28 +293,6 @@ function displayProducts(productsToRender, append = false) {
     });
 }
 
-/*
-// Load more products functionality
-function loadMoreProducts() {
-    const loadMoreBtn = document.getElementById('loadMoreBtn');
-
-    // Si no estamos mostrando todos los productos, restablecemos el filtro
-    if (currentFilter !== 'todos') {
-        filterProducts('todos'); // Esto reinicia también el índice y muestra primeros productos
-        return; // Esperamos a que filterProducts haga el trabajo
-    }
-
-    // Si ya estamos en "todos", simplemente cargamos todos los productos restantes
-    const productsToLoad = currentFilteredProducts.slice(currentProductIndex);
-    displayProducts(productsToLoad, true); // Mostrar todos los productos restantes
-    currentProductIndex += productsToLoad.length;
-
-    // Ocultar el botón, ya que no queda nada por mostrar
-    if (loadMoreBtn) {
-        loadMoreBtn.classList.add('hidden');
-    }
-}  */
-
 function renderProducts() {
   const grid = document.getElementById("productGrid");
   if (!grid) return;
@@ -334,10 +312,6 @@ function renderProducts() {
     // 👉 que el botón se muestre si hay más de 8 en TOTAL (no por categoría)
     btn.style.display = products.length <= productsPerPage ? "none" : "block";
   }
-
-  // Debug visible (te confirma cuántos está pintando)
-  //try { showToast(`Mostrando ${list.length} productos`, 'success'); }
-  //catch { console.log('Mostrando', list.length, 'productos'); }
 }
 
 document.addEventListener('click', (e) => {
