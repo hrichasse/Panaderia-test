@@ -44,6 +44,8 @@ let userAge = 0;
 let productsPerPage = 8; // Cuántos productos mostrar inicialmente y por cada "Cargar Más"
 let currentProductIndex = 0;
 let currentFilteredProducts = []; // Para mantener los productos filtrados actuales
+let showingAll = false; // saber si estás mostrando todo o solo 8
+
 
 // Función para incluir secciones HTML dinámicamente
 async function includeSections() {
@@ -66,7 +68,7 @@ function initApp() {
     // Inicializa los productos a mostrar
     currentFilteredProducts = [...products]; // Copia todos los productos inicialmente
     currentProductIndex = 0;
-    loadMoreProducts(); // Carga los primeros productos
+    renderProducts(); // Carga los primeros productos
 
     // Asegurar que el comportamiento del carrito se configure siempre (delegación + listeners)
     try {
@@ -249,7 +251,7 @@ function setupEventListeners() {
     // Listener para el botón "Cargar Más"
     const loadMoreBtn = document.getElementById('loadMoreBtn');
     if (loadMoreBtn) {
-        loadMoreBtn.addEventListener('click', loadMoreProducts);
+        loadMoreBtn.addEventListener('click', toggleShowAll);
     }
 
     // Filter buttons (delegación de eventos para asegurar que funcionen después de la carga)
@@ -291,6 +293,7 @@ function displayProducts(productsToRender, append = false) {
     });
 }
 
+/*
 // Load more products functionality
 function loadMoreProducts() {
     const loadMoreBtn = document.getElementById('loadMoreBtn');
@@ -310,7 +313,65 @@ function loadMoreProducts() {
     if (loadMoreBtn) {
         loadMoreBtn.classList.add('hidden');
     }
+}  */
+
+function renderProducts() {
+  const grid = document.getElementById("productGrid");
+  if (!grid) return;
+  grid.innerHTML = "";
+
+  // 👉 cuando showingAll = true, usa SIEMPRE "products" (los 16)
+  const list = showingAll
+    ? products
+    : currentFilteredProducts.slice(0, productsPerPage);
+
+  displayProducts(list);
+
+  const btn = document.getElementById("loadMoreBtn");
+  if (btn) {
+    btn.classList.remove("hidden");
+    btn.textContent = showingAll ? "Mostrar menos" : "Ver todos los productos";
+    // 👉 que el botón se muestre si hay más de 8 en TOTAL (no por categoría)
+    btn.style.display = products.length <= productsPerPage ? "none" : "block";
+  }
+
+  // Debug visible (te confirma cuántos está pintando)
+  //try { showToast(`Mostrando ${list.length} productos`, 'success'); }
+  //catch { console.log('Mostrando', list.length, 'productos'); }
 }
+
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('#loadMoreBtn');
+  if (!btn) return;
+  e.preventDefault();
+  toggleShowAll();
+});
+
+
+
+function toggleShowAll() {
+  // Si vamos a expandir, forzamos a ver TODAS las categorías
+  if (!showingAll) {
+    currentFilter = 'todos';
+    currentFilteredProducts = products;
+
+    // Marcar visualmente el filtro "Todos"
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.category === 'todos');
+    });
+  }
+
+  // Alternar estado y volver a pintar
+  showingAll = !showingAll;
+  renderProducts();
+
+  // Si colapsamos, subir a la grilla para ver el inicio
+  if (!showingAll) {
+    const grid = document.getElementById('productGrid');
+    if (grid) grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
 
 
 // Filter products
@@ -331,8 +392,9 @@ function filterProducts(category) {
     currentProductIndex = 0; // Reiniciar el índice al filtrar
     
     // Display the first batch of filtered products
-    displayProducts([], false); // Limpiar la cuadrícula
-    loadMoreProducts(); // Cargar los primeros productos filtrados
+    showingAll = false;    //  vuelve a 8
+    renderProducts();     //  renderiza según estado
+
 }
 
 // Add to cart

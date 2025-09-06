@@ -1,26 +1,26 @@
 <div class="products" id="productos">
-    <div class="container">
-        <h2 class="section-title">Nuestros Productos</h2>
-        
-        <div class="filter-buttons">
-            <button class="filter-btn active" data-category="todos" onclick="filterProducts('todos')">Todos</button>
-            <button class="filter-btn" data-category="tortas-cuadradas" onclick="filterProducts('tortas-cuadradas')">Tortas Cuadradas</button>
-            <button class="filter-btn" data-category="tortas-circulares" onclick="filterProducts('tortas-circulares')">Tortas Circulares</button>
-            <button class="filter-btn" data-category="postres-individuales" onclick="filterProducts('postres-individuales')">Postres Individuales</button>
-            <button class="filter-btn" data-category="sin-azucar" onclick="filterProducts('sin-azucar')">Sin Azúcar</button>
-            <button class="filter-btn" data-category="tradicional" onclick="filterProducts('tradicional')">Tradicional</button>
-            <button class="filter-btn" data-category="sin-gluten" onclick="filterProducts('sin-gluten')">Sin Gluten</button>
-            <button class="filter-btn" data-category="vegana" onclick="filterProducts('vegana')">Vegana</button>
-            <button class="filter-btn" data-category="especiales" onclick="filterProducts('especiales')">Especiales</button>
-        </div>
-
-        <div class="product-grid" id="productGrid">
-            <!-- Products will be loaded here by JavaScript -->
-        </div>
-
-        <!-- Contenedor para el botón "Cargar Más" (NUEVO) -->
-        <div class="load-more-container">
-            <button id="loadMoreBtn" class="cta-button hidden">Cargar Más Productos</button>
-        </div>
+  <div class="container">
+    <h2 class="section-title">Nuestros Productos</h2>
+    
+    <div class="filter-buttons">
+      <button class="filter-btn active" data-category="todos" onclick="filterProducts('todos')">Todos</button>
+      <button class="filter-btn" data-category="tortas-cuadradas" onclick="filterProducts('tortas-cuadradas')">Tortas Cuadradas</button>
+      <button class="filter-btn" data-category="tortas-circulares" onclick="filterProducts('tortas-circulares')">Tortas Circulares</button>
+      <button class="filter-btn" data-category="postres-individuales" onclick="filterProducts('postres-individuales')">Postres Individuales</button>
+      <button class="filter-btn" data-category="sin-azucar" onclick="filterProducts('sin-azucar')">Sin Azúcar</button>
+      <button class="filter-btn" data-category="tradicional" onclick="filterProducts('tradicional')">Tradicional</button>
+      <button class="filter-btn" data-category="sin-gluten" onclick="filterProducts('sin-gluten')">Sin Gluten</button>
+      <button class="filter-btn" data-category="vegana" onclick="filterProducts('vegana')">Vegana</button>
+      <button class="filter-btn" data-category="especiales" onclick="filterProducts('especiales')">Especiales</button>
     </div>
+
+    <div class="product-grid" id="productGrid">
+      <!-- Aquí se cargan los productos desde main.js -->
+    </div>
+
+    <!-- Botón para ver más o menos productos -->
+    <div class="load-more-container">
+      <button id="loadMoreBtn" type="button" class="cta-button">Ver todos los productos</button>
+    </div>
+  </div>
 </div>
