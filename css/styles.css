@@ -385,8 +385,13 @@ nav {
 
 /* Load More Button */
 .load-more-container {
+    display: flex;
     text-align: center;
     margin-top: 3rem;
+}
+.load-more-container #loadMoreBtn {
+  display: inline-block;     /* botón ocupa su tamaño */
+  margin: 0 auto;            /* asegura centrado si flex falla */
 }
 
 /* Cart Sidebar */
@@ -968,3 +973,6 @@ footer {
   transition: opacity .18s ease, transform .18s ease;
   opacity: 1;
 }
+
+/* Asegurar que no haya recortes al expandir */
+.product-grid { max-height: none !important; overflow: visible !important; }

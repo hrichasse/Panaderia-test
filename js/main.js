@@ -44,6 +44,8 @@ let userAge = 0;
 let productsPerPage = 8; // Cuántos productos mostrar inicialmente y por cada "Cargar Más"
 let currentProductIndex = 0;
 let currentFilteredProducts = []; // Para mantener los productos filtrados actuales
+let showingAll = false; // saber si estás mostrando todo o solo 8
+
 
 // Función para incluir secciones HTML dinámicamente
 async function includeSections() {
@@ -66,7 +68,7 @@ function initApp() {
     // Inicializa los productos a mostrar
     currentFilteredProducts = [...products]; // Copia todos los productos inicialmente
     currentProductIndex = 0;
-    loadMoreProducts(); // Carga los primeros productos
+    renderProducts(); // Carga los primeros productos
 
     // Asegurar que el comportamiento del carrito se configure siempre (delegación + listeners)
     try {
@@ -249,30 +251,9 @@ function setupEventListeners() {
     // Listener para el botón "Cargar Más" (reemplazado por una versión única, simple y resistente)
     const loadMoreBtn = document.getElementById('loadMoreBtn');
     if (loadMoreBtn) {
-        // click
-        loadMoreBtn.addEventListener('click', function (e) {
-            if (e && typeof e.preventDefault === 'function') e.preventDefault();
-            e.stopPropagation && e.stopPropagation();
-            // evita clicks múltiples rápidos
-            if (loadMoreBtn.disabled) return;
-            loadMoreBtn.disabled = true;
-            try {
-                loadMoreProducts();
-            } catch (err) {
-                console.error('Error en loadMoreProducts desde listener:', err);
-            } finally {
-                // reactivar botón tras pequeña demora para evitar duplicados
-                setTimeout(() => loadMoreBtn.disabled = false, 300);
-            }
-        });
 
-        // keyboard (Enter / Space)
-        loadMoreBtn.addEventListener('keydown', function (e) {
-            if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                this.click();
-            }
-        });
+        loadMoreBtn.addEventListener('click', toggleShowAll);
+
     }
 
     // Filter buttons (delegación de eventos para asegurar que funcionen después de la carga)
@@ -314,64 +295,62 @@ function displayProducts(productsToRender, append = false) {
     });
 }
 
-// Load more products functionality (mejorada para revelar tarjetas ocultas si existen)
-function loadMoreProducts() {
-    const productGrid = document.getElementById('productGrid');
-    if (!productGrid) return;
 
-    // Helper para detectar elementos ocultos por varias técnicas
-    function isHiddenCard(el) {
-        if (!el) return false;
-        const computed = window.getComputedStyle(el);
-        return el.hasAttribute('hidden') ||
-               el.classList.contains('hidden') ||
-               el.classList.contains('d-none') ||
-               computed.display === 'none' ||
-               computed.visibility === 'hidden' ||
-               el.offsetParent === null;
-    }
+function renderProducts() {
+  const grid = document.getElementById("productGrid");
+  if (!grid) return;
+  grid.innerHTML = "";
 
-    // 1) Buscar tarjetas ocultas en DOM por diferentes señales
-    const allCards = Array.from(productGrid.querySelectorAll('.product-card'));
-    const hiddenCards = allCards.filter(isHiddenCard);
+  // 👉 cuando showingAll = true, usa SIEMPRE "products" (los 16)
+  const list = showingAll
+    ? products
+    : currentFilteredProducts.slice(0, productsPerPage);
 
-    if (hiddenCards.length > 0) {
-        for (let i = 0; i < Math.min(productsPerPage, hiddenCards.length); i++) {
-            const card = hiddenCards[i];
-            // Quitar atributos/estilos que la ocultan
-            card.removeAttribute('hidden');
-            card.classList.remove('hidden', 'd-none', 'fade-out');
-            card.style.display = '';
-            card.style.visibility = '';
-            card.setAttribute('aria-hidden', 'false');
-            // Añadir animación de entrada
-            card.classList.add('fade-in');
-        }
-        // No incrementamos currentProductIndex aquí porque suponemos que esos elementos ya contaban en el DOM.
-    } else {
-        // 2) Si no hay tarjetas ocultas, cargamos el siguiente lote desde los datos
-        const productsToLoad = currentFilteredProducts.slice(currentProductIndex, currentProductIndex + productsPerPage);
-        if (productsToLoad.length > 0) {
-            displayProducts(productsToLoad, true); // Añadir productos
-            currentProductIndex += productsToLoad.length;
-        }
-    }
+  displayProducts(list);
 
-    // 3) Actualizar visibilidad del botón
-    const loadMoreBtn = document.getElementById('loadMoreBtn');
-    if (loadMoreBtn) {
-        // Mostrar el botón si aún hay productos por cargar desde datos o si hay tarjetas ocultas en DOM
-        const remainingFromData = currentProductIndex < currentFilteredProducts.length;
-        const stillHiddenInDOM = Array.from(productGrid.querySelectorAll('.product-card')).some(isHiddenCard);
-        if (remainingFromData || stillHiddenInDOM) {
-            loadMoreBtn.classList.remove('hidden');
-        } else {
-            loadMoreBtn.classList.add('hidden'); // Ocultar si no hay más productos
-        }
-    }
+  const btn = document.getElementById("loadMoreBtn");
+  if (btn) {
+    btn.classList.remove("hidden");
+    btn.textContent = showingAll ? "Mostrar menos" : "Ver todos los productos";
+    // 👉 que el botón se muestre si hay más de 8 en TOTAL (no por categoría)
+    btn.style.display = products.length <= productsPerPage ? "none" : "block";
+  }
 
-    console.debug('loadMoreProducts: index', currentProductIndex, 'total', currentFilteredProducts.length);
 }
+
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('#loadMoreBtn');
+  if (!btn) return;
+  e.preventDefault();
+  toggleShowAll();
+});
+
+
+
+function toggleShowAll() {
+  // Si vamos a expandir, forzamos a ver TODAS las categorías
+  if (!showingAll) {
+    currentFilter = 'todos';
+    currentFilteredProducts = products;
+
+    // Marcar visualmente el filtro "Todos"
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.category === 'todos');
+    });
+  }
+
+  // Alternar estado y volver a pintar
+  showingAll = !showingAll;
+  renderProducts();
+
+  // Si colapsamos, subir a la grilla para ver el inicio
+  if (!showingAll) {
+    const grid = document.getElementById('productGrid');
+    if (grid) grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+
 
 // Filter products
 function filterProducts(category) {
@@ -390,8 +369,9 @@ function filterProducts(category) {
     currentProductIndex = 0; // Reiniciar el índice al filtrar
     
     // Display the first batch of filtered products
-    displayProducts([], false); // Limpiar la cuadrícula
-    loadMoreProducts(); // Cargar los primeros productos filtrados
+    showingAll = false;    //  vuelve a 8
+    renderProducts();     //  renderiza según estado
+
 }
 
 // Add to cart
