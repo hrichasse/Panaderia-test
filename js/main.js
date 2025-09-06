@@ -248,10 +248,12 @@ function setupEventListeners() {
         navLinks.insertBefore(loginButton, navLinks.lastElementChild);
     }
 
-    // Listener para el botón "Cargar Más"
+    // Listener para el botón "Cargar Más" (reemplazado por una versión única, simple y resistente)
     const loadMoreBtn = document.getElementById('loadMoreBtn');
     if (loadMoreBtn) {
+
         loadMoreBtn.addEventListener('click', toggleShowAll);
+
     }
 
     // Filter buttons (delegación de eventos para asegurar que funcionen después de la carga)
@@ -293,6 +295,7 @@ function displayProducts(productsToRender, append = false) {
     });
 }
 
+
 function renderProducts() {
   const grid = document.getElementById("productGrid");
   if (!grid) return;
@@ -312,6 +315,7 @@ function renderProducts() {
     // 👉 que el botón se muestre si hay más de 8 en TOTAL (no por categoría)
     btn.style.display = products.length <= productsPerPage ? "none" : "block";
   }
+
 }
 
 document.addEventListener('click', (e) => {
@@ -361,7 +365,6 @@ function filterProducts(category) {
         }
     });
 
-    // Filter products and reset index
     currentFilteredProducts = category === 'todos' ? products : products.filter(product => product.category === category);
     currentProductIndex = 0; // Reiniciar el índice al filtrar
     
