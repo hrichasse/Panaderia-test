@@ -976,3 +976,45 @@ footer {
 
 /* Asegurar que no haya recortes al expandir */
 .product-grid { max-height: none !important; overflow: visible !important; }
+
+@media (max-width: 480px) {
+  .hero-content h1 {
+    font-size: 1.8rem;
+  }
+  .hero-content p {
+    font-size: 1rem;
+    padding: 0 0.5rem;
+  }
+  .discount-banner h3 {
+    font-size: 1.4rem;
+  }
+  .product-card, .category-card {
+    margin: 0 auto; /* centra tarjetas en pantallas muy estrechas */
+    max-width: 95%;
+  }
+  .nav-links {
+    gap: 0.5rem;
+  }
+}
+
+@media (min-width: 1400px) {
+  .container {
+    max-width: 1400px;
+  }
+  .hero {
+    height: 70vh; /* hero más alto en pantallas grandes */
+  }
+  .hero-content h1 {
+    font-size: 4rem;
+  }
+}
+
+.hero-content h1 {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+}
+.hero-content p {
+  font-size: clamp(1rem, 2.5vw, 1.2rem);
+}
+.section-title {
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+}
