@@ -24,9 +24,15 @@ body {
 }
 
 .container {
-    max-width: 1200px;
+    max-width: 1000px; /* reduce el ancho total para crear márgenes laterales visibles */
     margin: 0 auto;
-    padding: 0 20px;
+    padding: 0 24px; /* espacio en los laterales */
+    box-sizing: border-box;
+}
+
+/* Si quieres permitir un poco más en pantallas muy grandes */
+@media (min-width: 1400px) {
+    .container { max-width: 1200px; }
 }
 
 /* Header */
@@ -821,82 +827,167 @@ footer {
     display: none;
 }
 
-/* Nuevas secciones */
-
-/* Testimonials Section */
+/* ---------- Testimonials (mejorado: tarjetas con sombra y 3 columnas) ---------- */
 .testimonials {
     padding: 4rem 0;
-    background-color: #FDF5E6; /* Un color de fondo suave */
+    background-color: #FDF5E6;
     margin: 2rem 0;
     border-radius: 15px;
     box-shadow: 0 5px 20px var(--shadow-light);
 }
 
+/* Grid: 1 columna móvil, 2 tablet, 3 desktop */
 .testimonial-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
+    gap: 2.5rem;
+    grid-template-columns: 1fr;
+    justify-items: center;
+    align-items: start;
+    padding: 1rem 0; /* espacio interno para que no queden pegadas a los bordes */
 }
 
+/* Tarjeta visual */
 .testimonial-card {
     background: var(--white);
-    padding: 2rem;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    padding: 1.8rem;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+    width: 100%;
+    max-width: 360px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 220px;
     text-align: center;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease, background-color 0.25s ease;
+    cursor: default;
+    border: 1px solid rgba(0,0,0,0.03);
+}
+
+/* Resalte al pasar el mouse */
+.testimonial-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 18px 40px rgba(0,0,0,0.08);
+    border-color: rgba(139,69,19,0.12); /* tono chocolate suave */
+    background: linear-gradient(180deg, #ffffff, #fffaf7); /* sutil */
+    cursor: pointer;
+}
+
+/* Cita y autor dentro de la tarjeta */
+.testimonial-card blockquote {
+    margin: 0 0 1rem 0;
     font-style: italic;
     color: var(--primary-text-color);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    line-height: 1.6;
+    font-size: 0.98rem;
 }
 
-.testimonial-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
-}
-
-.testimonial-card .author {
-    font-weight: bold;
-    margin-top: 1rem;
+.testimonial-card .testimonial-author {
+    margin-top: 0.8rem;
+    font-weight: 900; /* intento preferente */
+    font-family: 'Lato', 'Arial', sans-serif;
     color: var(--accent-chocolate);
-    font-style: normal;
+    transition: color 0.2s ease, transform 0.2s ease;
+    display: block;
+    font-size: 1rem;
 }
 
-/* Newsletter Form in Footer */
-.newsletter-form {
+/* Asegurar que el autor esté en negrita aunque no tenga clase */
+.testimonial-card .testimonial-author,
+.testimonial-card .testimonial-author strong,
+.testimonial-card .testimonial-author b,
+.testimonial-card p:last-of-type {
+    font-weight: 900 !important;
+    color: var(--accent-chocolate);
+    display: block;
+    margin-top: 0.8rem;
+}
+
+/* Si hay guion al inicio: quitar espacio extra y mantener formato */
+.testimonial-card p:last-of-type::first-letter {
+    /* sin cambios visuales, regla presente por si se desea ajustar */
+}
+
+/* Tablet: 2 columnas */
+@media (min-width: 769px) and (max-width: 1099px) {
+    .testimonial-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 2rem;
+    }
+}
+
+/* Desktop: 3 columnas */
+@media (min-width: 1100px) {
+    .testimonial-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 2.5rem;
+    }
+}
+
+/* ---------- FAQ: restaurar diseño atractivo ---------- */
+.faq-section {
+    background: var(--white);
+    padding: 2.5rem 1.25rem;
+    border-radius: 15px;
+    box-shadow: 0 6px 24px var(--shadow-light);
+    margin: 2rem auto;
+    max-width: 1000px;
+}
+
+/* título centrado y estilo coherente con otras secciones */
+.faq-section .section-title,
+.faq-section h2 {
+    text-align: center;
+    font-family: 'Pacifico', cursive;
+    color: var(--accent-chocolate);
+    font-size: 2.6rem;
+    margin-bottom: 1.5rem;
+}
+
+/* lista de preguntas: centrada dentro de la tarjeta y con buen ancho */
+.faq-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 auto;
+    max-width: 820px;
+}
+
+/* cada item con icono personalizado, buen espaciado y linea base */
+.faq-list li {
     display: flex;
-    flex-direction: column; /* Apila los elementos en móviles */
-    gap: 0.8rem;
-    margin-top: 1rem;
-}
-
-.newsletter-form input {
-    flex-grow: 1;
-    padding: 0.8rem;
-    border: none;
-    border-radius: 8px;
-    background-color: rgba(255,255,255,0.2);
-    color: var(--white);
-    font-size: 1rem;
-}
-
-.newsletter-form input::placeholder {
-    color: rgba(255,255,255,0.7);
-}
-
-.newsletter-form button {
-    background: var(--accent-pink);
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.6rem 0;
     color: var(--primary-text-color);
-    border: none;
-    padding: 0.8rem 1.2rem;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: bold;
     font-size: 1rem;
-    transition: background 0.3s ease;
 }
 
-.newsletter-form button:hover {
-    background: var(--accent-pink-hover);
+/* icono triangular a la izquierda (más visible que el marcador por defecto) */
+.faq-list li::before {
+    content: "▸";
+    color: var(--accent-chocolate);
+    margin-top: 0.18rem;
+    font-size: 0.95rem;
+    line-height: 1;
+}
+
+/* si usas <details>/<summary>, estiliza el summary para mantener la apariencia */
+.faq-list details,
+.faq-list summary {
+    background: transparent;
+    border: none;
+    list-style: none;
+    cursor: pointer;
+    padding: 0;
+    margin: 0;
+}
+
+/* pequeño ajuste responsive para mantener lectura cómoda */
+@media (max-width: 768px) {
+    .faq-section { padding: 1.5rem 0.9rem; }
+    .faq-section .section-title { font-size: 2rem; }
+    .faq-list { max-width: 100%; padding: 0 8px; }
 }
 
 /* FAQ Section */
@@ -976,45 +1067,3 @@ footer {
 
 /* Asegurar que no haya recortes al expandir */
 .product-grid { max-height: none !important; overflow: visible !important; }
-
-@media (max-width: 480px) {
-  .hero-content h1 {
-    font-size: 1.8rem;
-  }
-  .hero-content p {
-    font-size: 1rem;
-    padding: 0 0.5rem;
-  }
-  .discount-banner h3 {
-    font-size: 1.4rem;
-  }
-  .product-card, .category-card {
-    margin: 0 auto; /* centra tarjetas en pantallas muy estrechas */
-    max-width: 95%;
-  }
-  .nav-links {
-    gap: 0.5rem;
-  }
-}
-
-@media (min-width: 1400px) {
-  .container {
-    max-width: 1400px;
-  }
-  .hero {
-    height: 70vh; /* hero más alto en pantallas grandes */
-  }
-  .hero-content h1 {
-    font-size: 4rem;
-  }
-}
-
-.hero-content h1 {
-  font-size: clamp(2rem, 5vw, 3.5rem);
-}
-.hero-content p {
-  font-size: clamp(1rem, 2.5vw, 1.2rem);
-}
-.section-title {
-  font-size: clamp(1.8rem, 4vw, 2.8rem);
-}
