@@ -1,8 +1,10 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
+import { useCart } from '../context/CartContext';
 
-function Header({ cartCount, onCartClick }) {
+function Header() {
   const { isAuthenticated, isAdmin, user, logout } = useAuth();
+  const { cartCount, setCartOpen } = useCart();
   const navigate = useNavigate();
 
   const scrollToSection = (id) => {
@@ -86,7 +88,7 @@ function Header({ cartCount, onCartClick }) {
             </li>
           )}
           
-          <li className="cart-icon" onClick={onCartClick}>
+          <li className="cart-icon" onClick={() => setCartOpen(true)}>
             <i className="fas fa-shopping-cart"></i>
             <span className="cart-count">{cartCount}</span>
           </li>

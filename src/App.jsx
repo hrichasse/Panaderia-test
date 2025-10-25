@@ -1,11 +1,9 @@
-import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import AppRoutes from './routes';
 
 function App() {
-  const [cartCount] = useState(0); // Simplificado por ahora
   const location = useLocation();
 
   // No mostrar Header/Footer en páginas de autenticación
@@ -13,12 +11,7 @@ function App() {
 
   return (
     <div>
-      {!hideHeaderFooter && (
-        <Header 
-          cartCount={cartCount}
-          onCartClick={() => {}}
-        />
-      )}
+      {!hideHeaderFooter && <Header />}
       
       <AppRoutes />
       

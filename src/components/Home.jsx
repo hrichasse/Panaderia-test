@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useCart } from '../context/CartContext';
 import Hero from './Hero';
 import DiscountBanner from './DiscountBanner';
 import About from './About';
@@ -10,40 +11,20 @@ import Cart from './Cart';
 import Toast from './Toast';
 
 function Home() {
-  const [cart, setCart] = useState([]);
-  const [cartOpen, setCartOpen] = useState(false);
+  const { 
+    cart, 
+    cartOpen, 
+    setCartOpen, 
+    addToCart, 
+    updateQuantity, 
+    checkout 
+  } = useCart();
+  
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
 
-  const addToCart = (product) => {
-    const existingItem = cart.find(item => item.id === product.id);
-    if (existingItem) {
-      setCart(cart.map(item => 
-        item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
-      ));
-    } else {
-      setCart([...cart, { ...product, quantity: 1 }]);
-    }
+  const handleAddToCart = (product) => {
+    addToCart(product);
     showToast('Producto agregado al carrito', 'success');
-    setCartOpen(true);
-  };
-
-  const removeFromCart = (productId) => {
-    setCart(cart.filter(item => item.id !== productId));
-    showToast('Producto eliminado del carrito', 'success');
-  };
-
-  const updateQuantity = (productId, change) => {
-    const item = cart.find(item => item.id === productId);
-    if (item) {
-      const newQuantity = item.quantity + change;
-      if (newQuantity <= 0) {
-        removeFromCart(productId);
-      } else {
-        setCart(cart.map(item => 
-          item.id === productId ? { ...item, quantity: newQuantity } : item
-        ));
-      }
-    }
   };
 
   const showToast = (message, type = 'success') => {
@@ -53,15 +34,9 @@ function Home() {
     }, 3000);
   };
 
-  const checkout = () => {
-    if (cart.length === 0) {
-      showToast('Tu carrito está vacío', 'error');
-      return;
-    }
-    const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    showToast(`Pedido procesado por $${total.toLocaleString()} CLP. ¡Gracias por tu compra!`, 'success');
-    setCart([]);
-    setCartOpen(false);
+  const handleCheckout = () => {
+    const result = checkout();
+    showToast(result.message, result.success ? 'success' : 'error');
   };
 
   return (
@@ -71,14 +46,14 @@ function Home() {
       <About />
       <Testimonials />
       <Categories />
-      <Products onAddToCart={addToCart} />
+      <Products onAddToCart={handleAddToCart} />
       <FAQ />
       <Cart 
         cart={cart}
         isOpen={cartOpen}
         onClose={() => setCartOpen(false)}
         onUpdateQuantity={updateQuantity}
-        onCheckout={checkout}
+        onCheckout={handleCheckout}
       />
       {toast.show && <Toast message={toast.message} type={toast.type} />}
     </>
