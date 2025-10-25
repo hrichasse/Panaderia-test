@@ -1,7 +1,14 @@
 {
+<<<<<<< HEAD
+  "framework": "vite",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "installCommand": "npm install",
+=======
   "buildCommand": "npm run build --prefix pasteleria-mil-sabores",
   "outputDirectory": "pasteleria-mil-sabores/dist",
   "installCommand": "npm install --prefix pasteleria-mil-sabores",
+>>>>>>> 9f7b933dc2191dc6e1c81e3105ccb9a127870c8f
   "rewrites": [
     {
       "source": "/(.*)",
