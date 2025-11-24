@@ -1,9 +1,10 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 
 function Login() {
-  const [isRegistering, setIsRegistering] = useState(false);
+  const location = useLocation();
+  const [isRegistering, setIsRegistering] = useState(location.pathname.toLowerCase().includes('register'));
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -13,8 +14,12 @@ function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   
-  const { login, loginAttempts } = useAuth();
+  const { login, register } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    setIsRegistering(location.pathname.toLowerCase().includes('register'));
+  }, [location.pathname]);
 
   const handleChange = (e) => {
     setFormData({
@@ -30,7 +35,6 @@ function Login() {
     setLoading(true);
 
     try {
-      // Validaciones del lado del cliente
       if (isRegistering) {
         if (formData.password !== formData.confirmPassword) {
           throw new Error('Las contraseñas no coinciden');
@@ -41,32 +45,17 @@ function Login() {
         if (!formData.name || formData.name.length < 2) {
           throw new Error('El nombre debe tener al menos 2 caracteres');
         }
-      }
-
-      if (!isRegistering) {
-        // MODO LOGIN - validar con usuarios existentes
-        // Determinar el rol basado en el email
-        const role = formData.email.endsWith('@admin.com') ? 'admin' : 'cliente';
-
-        // Intentar login (validará credenciales)
-        await login({
-          name: formData.name || formData.email.split('@')[0],
-          email: formData.email,
-          password: formData.password,
-          role
-        });
-      } else {
-        // MODO REGISTRO - crear nuevo usuario
-        // En este caso simulado, el registro usa las mismas validaciones
-        // En producción, aquí harías POST /api/register
-        const role = formData.email.endsWith('@admin.com') ? 'admin' : 'cliente';
         
-        await login({
-          name: formData.name,
-          email: formData.email,
+        const result = await register({
+          name: formData.name.trim(),
+          email: formData.email.trim(),
           password: formData.password,
-          role
+          confirmPassword: formData.confirmPassword
         });
+        if (!result.success) throw new Error(result.message);
+      } else {
+        const result = await login(formData.email.trim(), formData.password);
+        if (!result.success) throw new Error(result.message);
       }
 
       // Redirigir a la página intentada originalmente o al home
@@ -75,14 +64,13 @@ function Login() {
       navigate(redirectPath, { replace: true });
       
     } catch (err) {
-      setError(err.message || 'Error al iniciar sesión');
+      setError(err.message || 'Error al procesar la solicitud');
     } finally {
       setLoading(false);
     }
   };
 
-  // Bloquear si hay demasiados intentos
-  const isBlocked = loginAttempts >= 5;
+  const isBlocked = false;
 
   return (
     <div className="login-page" style={{ 
@@ -125,20 +113,6 @@ function Login() {
               fontSize: '0.9rem'
             }}>
               {error}
-            </div>
-          )}
-
-          {isBlocked && (
-            <div style={{
-              padding: '1rem',
-              marginBottom: '1.5rem',
-              background: '#fef3e0',
-              border: '1px solid #f5c66d',
-              borderRadius: '8px',
-              color: '#8b4513',
-              fontSize: '0.9rem'
-            }}>
-              Demasiados intentos. Espera 5 minutos antes de volver a intentar.
             </div>
           )}
 
