@@ -86,7 +86,13 @@ export function AuthProvider({ children }) {
     try {
       setLoading(true);
       setError(null);
+      
+      console.log('Enviando registro:', { name, email, password: '***', confirmPassword: '***' });
+      
       const response = await axios.post('/auth/register', { name, email, password, confirmPassword });
+      
+      console.log('Respuesta del servidor:', response.data);
+      
       const { token, user: userData } = response.data.data;
       
       localStorage.setItem('token', token);
@@ -94,7 +100,21 @@ export function AuthProvider({ children }) {
       
       return { success: true, user: userData };
     } catch (err) {
-      const message = err.response?.data?.message || 'Error al registrar usuario';
+      console.error('Error completo:', err);
+      console.error('Error response:', err.response?.data);
+      
+      let message = 'Error al registrar usuario';
+      
+      if (err.response?.data?.message) {
+        message = err.response.data.message;
+      } else if (err.response?.data?.details) {
+        message = err.response.data.details.map(d => d.message).join(', ');
+      } else if (err.message === 'Network Error') {
+        message = 'No se puede conectar al servidor. Verifica que el backend esté corriendo en http://localhost:3001';
+      } else if (err.code === 'ERR_NETWORK') {
+        message = 'Error de red. El backend no está disponible';
+      }
+      
       setError(message);
       return { success: false, message };
     } finally {
