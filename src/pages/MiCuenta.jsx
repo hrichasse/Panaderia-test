@@ -1,40 +1,62 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../auth/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 function MiCuenta() {
+  const navigate = useNavigate();
   const { user, logout, updateProfile, sessionTimeRemaining } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     name: user?.name || '',
-    email: user?.email || ''
+    phone: user?.phone || '',
+    address: {
+      street: user?.address?.street || '',
+      city: user?.address?.city || '',
+      state: user?.address?.state || '',
+      zipCode: user?.address?.zipCode || '',
+      country: user?.address?.country || ''
+    }
   });
   const [message, setMessage] = useState({ text: '', type: '' });
 
-  const handleChange = (e) => {
+  useEffect(() => {
     setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
+      name: user?.name || '',
+      phone: user?.phone || '',
+      address: {
+        street: user?.address?.street || '',
+        city: user?.address?.city || '',
+        state: user?.address?.state || '',
+        zipCode: user?.address?.zipCode || '',
+        country: user?.address?.country || ''
+      }
     });
+  }, [user]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    if (name.startsWith('address.')) {
+      const field = name.split('.')[1];
+      setFormData({
+        ...formData,
+        address: { ...formData.address, [field]: value }
+      });
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      updateProfile(formData);
+      await updateProfile(formData);
       setMessage({ text: 'Perfil actualizado exitosamente', type: 'success' });
       setIsEditing(false);
       setTimeout(() => setMessage({ text: '', type: '' }), 3000);
     } catch (error) {
-      setMessage({ text: error.message, type: 'error' });
+      setMessage({ text: error.message || 'Error al actualizar perfil', type: 'error' });
     }
   };
-
-  // Pedidos simulados (en producción vendrían del backend)
-  const pedidosSimulados = [
-    { id: 1, fecha: '2025-10-20', producto: 'Torta de Chocolate', cantidad: 1, total: 45000, estado: 'Entregado' },
-    { id: 2, fecha: '2025-10-15', producto: 'Mousse de Chocolate', cantidad: 3, total: 15000, estado: 'Entregado' },
-    { id: 3, fecha: '2025-10-10', producto: 'Torta Vegana de Chocolate', cantidad: 1, total: 50000, estado: 'Entregado' }
-  ];
 
   return (
     <div className="mi-cuenta-page" style={{ minHeight: '80vh', padding: '3rem 0' }}>
@@ -192,14 +214,61 @@ function MiCuenta() {
                     color: 'var(--primary-text-color)',
                     marginBottom: '0.5rem'
                   }}>
-                    Email
+                    Teléfono
                   </label>
                   <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
+                    type="text"
+                    name="phone"
+                    value={formData.phone}
                     onChange={handleChange}
-                    required
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem',
+                      border: '2px solid var(--accent-pink)',
+                      borderRadius: '8px',
+                      fontSize: '1rem'
+                    }}
+                  />
+                </div>
+
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <label style={{ 
+                    display: 'block',
+                    fontWeight: '600',
+                    color: 'var(--primary-text-color)',
+                    marginBottom: '0.5rem'
+                  }}>
+                    Calle
+                  </label>
+                  <input
+                    type="text"
+                    name="address.street"
+                    value={formData.address.street}
+                    onChange={handleChange}
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem',
+                      border: '2px solid var(--accent-pink)',
+                      borderRadius: '8px',
+                      fontSize: '1rem'
+                    }}
+                  />
+                </div>
+
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <label style={{ 
+                    display: 'block',
+                    fontWeight: '600',
+                    color: 'var(--primary-text-color)',
+                    marginBottom: '0.5rem'
+                  }}>
+                    Ciudad
+                  </label>
+                  <input
+                    type="text"
+                    name="address.city"
+                    value={formData.address.city}
+                    onChange={handleChange}
                     style={{
                       width: '100%',
                       padding: '0.75rem',
@@ -231,7 +300,17 @@ function MiCuenta() {
                     type="button"
                     onClick={() => {
                       setIsEditing(false);
-                      setFormData({ name: user?.name || '', email: user?.email || '' });
+                      setFormData({
+                        name: user?.name || '',
+                        phone: user?.phone || '',
+                        address: {
+                          street: user?.address?.street || '',
+                          city: user?.address?.city || '',
+                          state: user?.address?.state || '',
+                          zipCode: user?.address?.zipCode || '',
+                          country: user?.address?.country || ''
+                        }
+                      });
                     }}
                     style={{
                       flex: 1,
@@ -292,57 +371,23 @@ function MiCuenta() {
             }}>
               Mis Pedidos
             </h2>
-
-            {pedidosSimulados.length === 0 ? (
-              <p style={{ color: '#666', textAlign: 'center', padding: '2rem' }}>
-                Aún no has realizado ningún pedido
-              </p>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                {pedidosSimulados.map(pedido => (
-                  <div key={pedido.id} style={{
-                    padding: '1.25rem',
-                    background: 'var(--primary-bg-color)',
-                    borderRadius: '10px',
-                    border: '2px solid var(--accent-pink)'
-                  }}>
-                    <div style={{ 
-                      display: 'flex', 
-                      justifyContent: 'space-between',
-                      marginBottom: '0.75rem'
-                    }}>
-                      <span style={{ fontWeight: '700', color: 'var(--accent-chocolate)' }}>
-                        Pedido #{pedido.id}
-                      </span>
-                      <span style={{
-                        padding: '0.25rem 0.75rem',
-                        background: pedido.estado === 'Entregado' ? '#d4edda' : '#fff3cd',
-                        color: pedido.estado === 'Entregado' ? '#155724' : '#856404',
-                        borderRadius: '15px',
-                        fontSize: '0.85rem',
-                        fontWeight: '600'
-                      }}>
-                        {pedido.estado}
-                      </span>
-                    </div>
-                    <p style={{ margin: '0.5rem 0', fontSize: '0.9rem', color: '#666' }}>
-                      <strong>Fecha:</strong> {pedido.fecha}
-                    </p>
-                    <p style={{ margin: '0.5rem 0', color: 'var(--primary-text-color)' }}>
-                      {pedido.producto} x {pedido.cantidad}
-                    </p>
-                    <p style={{ 
-                      margin: '0.5rem 0 0',
-                      fontSize: '1.1rem',
-                      fontWeight: '700',
-                      color: 'var(--accent-chocolate)'
-                    }}>
-                      ${pedido.total.toLocaleString()} CLP
-                    </p>
-                  </div>
-                ))}
-              </div>
-            )}
+            <p style={{ color: '#666', textAlign: 'center', padding: '1rem' }}>
+              <button
+                onClick={() => navigate('/orders')}
+                style={{
+                  padding: '0.75rem 1.5rem',
+                  background: 'var(--accent-chocolate)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontSize: '1rem',
+                  fontWeight: '600'
+                }}
+              >
+                Ver mis órdenes
+              </button>
+            </p>
           </div>
         </div>
       </div>

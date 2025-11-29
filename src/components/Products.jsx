@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { products } from '../data/products';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from '../utils/axios';
 
 // Carga todas las imágenes de la carpeta pasteles de forma eager para poder resolver dinámicamente
 const images = import.meta.glob('../assets/pasteles/*', { eager: true, as: 'url' });
@@ -20,8 +21,12 @@ function resolveProductImage(product) {
 }
 
 function Products({ onAddToCart }) {
+  const navigate = useNavigate();
   const [currentFilter, setCurrentFilter] = useState('todos');
   const [showingAll, setShowingAll] = useState(false);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const productsPerPage = 8;
 
   const filters = [
@@ -35,6 +40,27 @@ function Products({ onAddToCart }) {
     { id: 'vegana', label: 'Vegana' },
     { id: 'especiales', label: 'Especiales' }
   ];
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        setLoading(true);
+        const params = { active: 'true', limit: 100 };
+        if (currentFilter !== 'todos') params.category = currentFilter;
+        const { data } = await axios.get('/products', { params });
+        if (!mounted) return;
+        setProducts(data?.data?.items || []);
+        setError('');
+      } catch (err) {
+        if (!mounted) return;
+        setError(err.response?.data?.message || 'Error al cargar productos');
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
+    return () => { mounted = false; };
+  }, [currentFilter]);
 
   const filterProducts = (category) => {
     setCurrentFilter(category);
@@ -77,6 +103,9 @@ function Products({ onAddToCart }) {
   // Show button if there are more than 8 total products
   const showLoadMoreBtn = products.length > productsPerPage;
 
+  if (loading) return <div className="products" id="productos"><div className="container"><p style={{ textAlign: 'center', padding: '2rem' }}>Cargando productos...</p></div></div>;
+  if (error) return <div className="products" id="productos"><div className="container"><p style={{ textAlign: 'center', padding: '2rem', color: 'red' }}>{error}</p></div></div>;
+
   return (
     <div className="products" id="productos">
       <div className="container">
@@ -97,15 +126,15 @@ function Products({ onAddToCart }) {
 
         <div className="product-grid" id="productGrid">
           {displayedProducts.map(product => (
-            <div key={product.id} className="product-card fade-in">
+            <div key={product._id} className="product-card fade-in" onClick={() => navigate(`/products/${product._id}`)} style={{ cursor: 'pointer' }}>
               <div className="product-image">
-                <img src={resolveProductImage(product)} alt={product.name} />
+                <img src={product.image || resolveProductImage(product)} alt={product.name} />
               </div>
               <div className="product-info">
                 <h3 className="product-title">{product.name}</h3>
                 <p className="product-description">{product.description}</p>
                 <p className="product-price">${product.price.toLocaleString()}</p>
-                <button className="add-to-cart" onClick={() => onAddToCart(product)}>
+                <button className="add-to-cart" onClick={(e) => { e.stopPropagation(); onAddToCart({ ...product, id: product._id }); }}>
                   Agregar al Carrito
                 </button>
               </div>

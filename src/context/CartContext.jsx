@@ -1,4 +1,21 @@
 import { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import axios from '../utils/axios';
+import { ORDER_STATUSES, PAYMENT_METHODS } from './orders.constants';
+
+// Backend contract reference:
+// 1) Auth: Requires JWT token in `Authorization: Bearer <token>`
+// 2) POST /api/orders expects body:
+//    {
+//      items: [{ productId, quantity }],
+//      paymentMethod: "efectivo" | "tarjeta" | "transferencia",
+//      deliveryAddress: { street, number, city, notes? },
+//      notes?: string
+//    }
+//    Do NOT send: name, price, total, userId, status
+// 3) Response shape: response.data.data.order
+//    Includes: full order with server-calculated total, populated user, current prices
+
+// See constants in './orders.constants'
 
 const CartContext = createContext(null);
 
@@ -124,20 +141,77 @@ export function CartProvider({ children }) {
   // Cantidad total de items (suma de todas las cantidades)
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
-  // Checkout (procesar pedido)
-  const checkout = useCallback(() => {
+  // Checkout (procesar pedido y crear orden en backend)
+  // Params: { paymentMethod, deliveryAddress: { street, number, city, notes? }, notes? }
+  const checkout = useCallback(async ({ paymentMethod, deliveryAddress, notes } = {}) => {
     if (cart.length === 0) {
       return { success: false, message: 'Tu carrito está vacío' };
     }
-    
-    const total = cartTotal;
-    clearCart();
-    
-    return { 
-      success: true, 
-      message: `Pedido procesado por $${total.toLocaleString()} CLP. ¡Gracias por tu compra!` 
-    };
-  }, [cart.length, cartTotal, clearCart]);
+
+    try {
+      // Validaciones básicas antes de llamar al backend
+      if (!paymentMethod || !PAYMENT_METHODS.includes(paymentMethod)) {
+        return { success: false, message: 'Método de pago inválido' };
+      }
+      if (!deliveryAddress || !deliveryAddress.street || !deliveryAddress.city) {
+        return { success: false, message: 'Dirección de entrega incompleta' };
+      }
+
+      // Mapear items al formato exacto esperado por el backend
+      const items = cart.map((item) => ({
+        productId: item.id,
+        quantity: item.quantity,
+      }));
+
+      const payload = {
+        items,
+        paymentMethod,
+        deliveryAddress,
+        ...(notes ? { notes } : {}),
+      };
+
+      console.log('Enviando orden al backend:', payload);
+
+      const response = await axios.post('/orders', payload);
+      
+      console.log('Respuesta del backend:', response.data);
+      
+      const order = response.data?.data?.order || response.data?.order || response.data;
+
+      // Limpiar carrito tras crear orden
+      clearCart();
+
+      return {
+        success: true,
+        order,
+        message: 'Orden creada correctamente',
+      };
+    } catch (err) {
+      console.error('Error completo en checkout:', err);
+      console.error('Response data:', err.response?.data);
+      console.error('Status:', err.response?.status);
+      
+      const message = err.response?.data?.message || 'Error al crear la orden';
+      const details = err.response?.data?.details;
+      return {
+        success: false,
+        message,
+        ...(details ? { details } : {}),
+        statusCode: err.response?.status,
+      };
+    }
+  }, [cart, clearCart]);
+
+  // Listar órdenes (GET /api/orders) para el usuario autenticado
+  const listOrders = useCallback(async () => {
+    try {
+      const { data } = await axios.get('/orders');
+      return { success: true, orders: data?.data?.orders || [] };
+    } catch (err) {
+      const message = err.response?.data?.message || 'Error al listar órdenes';
+      return { success: false, message, statusCode: err.response?.status };
+    }
+  }, []);
 
   const value = {
     cart,
@@ -148,6 +222,7 @@ export function CartProvider({ children }) {
     updateQuantity,
     clearCart,
     checkout,
+    listOrders,
     cartTotal,
     cartCount
   };

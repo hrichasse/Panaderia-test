@@ -1,11 +1,18 @@
 import { Link, useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import { useAuth } from '../auth/AuthContext';
 import { useCart } from '../context/CartContext';
 
 function Header() {
-  const { isAuthenticated, isAdmin, user, logout } = useAuth();
+  const { isAuthenticated, isAdmin, user, logout, getProfile } = useAuth();
   const { cartCount, setCartOpen } = useCart();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isAuthenticated && !user?.name) {
+      getProfile();
+    }
+  }, [isAuthenticated, user, getProfile]);
 
   const scrollToSection = (id) => {
     // Si estamos en otra página, navegar a home primero

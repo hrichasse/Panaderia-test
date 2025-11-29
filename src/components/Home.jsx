@@ -34,9 +34,9 @@ function Home() {
     }, 3000);
   };
 
-  const handleCheckout = () => {
-    const result = checkout();
-    showToast(result.message, result.success ? 'success' : 'error');
+  const handleCheckout = async (checkoutData) => {
+    const result = await checkout(checkoutData);
+    return result;
   };
 
   return (
