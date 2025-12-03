@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../auth/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
 
 function MiCuenta() {
   const navigate = useNavigate();
-  const { user, logout, updateProfile, sessionTimeRemaining } = useAuth();
+  const { user, logout, updateProfile } = useAuth();
+  const { listOrders } = useCart();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     name: user?.name || '',
@@ -18,6 +20,9 @@ function MiCuenta() {
     }
   });
   const [message, setMessage] = useState({ text: '', type: '' });
+  const [orders, setOrders] = useState([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
+  const [ordersError, setOrdersError] = useState('');
 
   useEffect(() => {
     setFormData({
@@ -57,6 +62,27 @@ function MiCuenta() {
       setMessage({ text: error.message || 'Error al actualizar perfil', type: 'error' });
     }
   };
+
+  // Cargar órdenes reales desde el backend
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      if (!user) return;
+      setOrdersLoading(true);
+      console.log('[MiCuenta] user id:', user?._id);
+      const res = await listOrders();
+      console.log('[MiCuenta] resultado listOrders:', res);
+      if (!mounted) return;
+      if (res.success) {
+        setOrders(res.orders);
+        setOrdersError('');
+      } else {
+        setOrdersError(res.message || 'Error al obtener órdenes');
+      }
+      setOrdersLoading(false);
+    })();
+    return () => { mounted = false; };
+  }, [user, listOrders]);
 
   return (
     <div className="mi-cuenta-page" style={{ minHeight: '80vh', padding: '3rem 0' }}>
@@ -335,8 +361,9 @@ function MiCuenta() {
               paddingTop: '1.5rem',
               borderTop: '1px solid #eee'
             }}>
+              {/* Tiempo de sesión (placeholder, puede implementarse en AuthContext si se requiere) */}
               <p style={{ fontSize: '0.9rem', color: '#666', marginBottom: '0.5rem' }}>
-                Tiempo de sesión restante: <strong>{sessionTimeRemaining} minutos</strong>
+                Sesión activa
               </p>
               <button
                 onClick={logout}
@@ -357,7 +384,7 @@ function MiCuenta() {
             </div>
           </div>
 
-          {/* Historial de Pedidos */}
+          {/* Historial de Pedidos (Órdenes reales) */}
           <div style={{
             background: 'var(--white)',
             padding: '2rem',
@@ -369,25 +396,74 @@ function MiCuenta() {
               fontSize: '1.5rem',
               marginBottom: '1.5rem'
             }}>
-              Mis Pedidos
+              Mis Órdenes
             </h2>
-            <p style={{ color: '#666', textAlign: 'center', padding: '1rem' }}>
+            {ordersLoading && (
+              <p style={{ color: '#666' }}>Cargando órdenes...</p>
+            )}
+            {ordersError && !ordersLoading && (
+              <p style={{ color: 'red' }}>{ordersError}</p>
+            )}
+            {!ordersLoading && !ordersError && orders.length === 0 && (
+              <p style={{ color: '#666' }}>Aún no tienes órdenes.</p>
+            )}
+            {!ordersLoading && !ordersError && orders.length > 0 && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxHeight: '400px', overflowY: 'auto' }}>
+                {orders.map(order => (
+                  <div key={order._id} style={{
+                    padding: '1rem',
+                    background: 'var(--primary-bg-color)',
+                    borderRadius: '10px',
+                    border: '2px solid var(--accent-pink)'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                      <strong style={{ color: 'var(--accent-chocolate)' }}>Orden #{order._id.slice(-6)}</strong>
+                      <span style={{
+                        padding: '0.25rem 0.6rem',
+                        background: '#fff3cd',
+                        color: '#856404',
+                        borderRadius: '12px',
+                        fontSize: '0.75rem',
+                        fontWeight: '600'
+                      }}>{order.status}</span>
+                    </div>
+                    <p style={{ margin: '0.25rem 0', fontSize: '0.85rem', color: '#555' }}>
+                      Fecha: {new Date(order.createdAt).toLocaleDateString()}
+                    </p>
+                    <p style={{ margin: '0.25rem 0', fontSize: '0.85rem', color: '#555' }}>
+                      Total: <strong>${order.total?.toLocaleString()}</strong>
+                    </p>
+                    <div style={{ marginTop: '0.5rem' }}>
+                      <p style={{ fontSize: '0.75rem', margin: '0 0 0.25rem', color: '#666' }}>Items:</p>
+                      <ul style={{ margin: 0, paddingLeft: '1.1rem' }}>
+                        {order.items.map(it => (
+                          <li key={it.productId} style={{ fontSize: '0.75rem', color: '#444' }}>
+                            {it.name || it.productId} x {it.quantity} (${(it.price * it.quantity).toLocaleString()})
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div style={{ marginTop: '1.25rem', textAlign: 'center' }}>
               <button
                 onClick={() => navigate('/orders')}
                 style={{
-                  padding: '0.75rem 1.5rem',
+                  padding: '0.6rem 1.2rem',
                   background: 'var(--accent-chocolate)',
                   color: 'white',
                   border: 'none',
                   borderRadius: '8px',
                   cursor: 'pointer',
-                  fontSize: '1rem',
+                  fontSize: '0.85rem',
                   fontWeight: '600'
                 }}
               >
-                Ver mis órdenes
+                Ver todas
               </button>
-            </p>
+            </div>
           </div>
         </div>
       </div>

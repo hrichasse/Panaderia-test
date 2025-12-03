@@ -205,9 +205,20 @@ export function CartProvider({ children }) {
   // Listar órdenes (GET /api/orders) para el usuario autenticado
   const listOrders = useCallback(async () => {
     try {
+      console.log('[listOrders] solicitando GET /orders');
       const { data } = await axios.get('/orders');
-      return { success: true, orders: data?.data?.orders || [] };
+      try {
+        console.log('[listOrders] respuesta cruda JSON:', JSON.stringify(data, null, 2));
+      } catch {
+        console.log('[listOrders] no se pudo stringify la respuesta');
+      }
+      // Backend returns pagination envelope: { message, statusCode, data: { items: [...], page, limit, total, totalPages } }
+      const orders = data?.data?.items || data?.items || data?.data?.orders || data?.orders || [];
+      console.log('[listOrders] orders parseadas:', orders);
+      return { success: true, orders };
     } catch (err) {
+      console.error('[listOrders] error:', err);
+      console.error('[listOrders] error response data:', err.response?.data);
       const message = err.response?.data?.message || 'Error al listar órdenes';
       return { success: false, message, statusCode: err.response?.status };
     }

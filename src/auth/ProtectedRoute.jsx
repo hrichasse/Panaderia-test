@@ -2,20 +2,21 @@ import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 
 /**
- * Componente que protege rutas que requieren autenticación
- * Si el usuario NO está logueado, redirige a /login
- * Si está logueado, renderiza los componentes hijos
+ * Protege rutas que requieren autenticación.
+ * Uso recomendado (anidado):
+ * <Route element={<ProtectedRoute />}>\n  <Route path="/mi-cuenta" element={<MiCuenta />} />\n</Route>
+ * También soporta el patrón directo usado actualmente: <Route path="/mi-cuenta" element={<ProtectedRoute><MiCuenta /></ProtectedRoute>} />
  */
-export default function ProtectedRoute() {
+export default function ProtectedRoute({ children }) {
   const { isAuthenticated } = useAuth();
-  
+
   if (!isAuthenticated) {
-    // Guardar la ruta intentada para redirigir después del login
     const currentPath = window.location.pathname;
     sessionStorage.setItem('redirect_after_login', currentPath);
-    
     return <Navigate to="/login" replace />;
   }
-  
-  return <Outlet />;
+
+  // Si se pasaron children (patrón envolvente), retornarlos.
+  // Si no, usar <Outlet /> para el patrón de rutas anidadas.
+  return children ? children : <Outlet />;
 }
