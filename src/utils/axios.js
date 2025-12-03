@@ -1,8 +1,9 @@
 import axios from 'axios';
 
 // Configurar baseURL para el backend
+// Usa variable de entorno VITE_API_URL o fallback a producción en Vercel
 const instance = axios.create({
-  baseURL: 'http://localhost:3001/api',
+  baseURL: import.meta.env.VITE_API_URL || 'https://pasteleria-backend-nine.vercel.app/api',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json'
