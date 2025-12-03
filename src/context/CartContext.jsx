@@ -159,7 +159,7 @@ export function CartProvider({ children }) {
 
       // Mapear items al formato exacto esperado por el backend
       const items = cart.map((item) => ({
-        productId: item.id,
+        productId: String(item.id),
         quantity: item.quantity,
       }));
 
