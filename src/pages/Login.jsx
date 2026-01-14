@@ -95,7 +95,7 @@ function Login() {
       }}>
         {/* Header con decoración y título */}
         <div style={{
-          background: 'linear-gradient(135deg, #8B6F47 0%, #A0825A 100%)',
+          background: 'white',
           borderRadius: '25px 25px 0 0',
           padding: '2.5rem 2rem',
           textAlign: 'center',
@@ -156,7 +156,7 @@ function Login() {
             {isRegistering ? 'Crear Cuenta' : 'Pastelería Mil Sabores'}
           </h1>
           <p style={{ 
-            color: 'rgba(255,255,255,0.9)',
+            color: 'rgba(93, 64, 55, 0.8)',
             fontSize: '1rem',
             marginBottom: 0,
             fontWeight: '500'
@@ -414,7 +414,7 @@ function Login() {
                 }
               }}
             >
-              {loading ? '⏳ Procesando...' : (isRegistering ? '✨ Crear Cuenta' : '🔓 LOGIN')}
+              {loading ? '⏳ Procesando...' : (isRegistering ? '✨ Crear Cuenta' : 'Iniciar Sesión')}
             </button>
 
             {/* Separador */}
