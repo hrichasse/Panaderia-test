@@ -1,0 +1,16 @@
+<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fondo blanco -->
+  <circle cx="12" cy="12" r="12" fill="white"/>
+  <!-- Arco rojo (arriba) -->
+  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 2c3.86 0 7.29 2.45 8.74 5.9h-3.58l-1.5-3.2H12.34L10.84 9.9H6.26C7.71 4.45 11.14 4 12 4z" fill="#EA4335"/>
+  <!-- Arco amarillo (izquierda) -->
+  <path d="M4.26 12c0 1.66.67 3.16 1.76 4.24l2.86-2.86c-.84-.84-1.36-2-1.36-3.28 0-.84.28-1.62.76-2.24L4.26 12z" fill="#FBBC05"/>
+  <!-- Arco verde (abajo) -->
+  <path d="M12 20c-4.41 0-8-3.59-8-8 0-1.66.5-3.21 1.36-4.53l-2.86-2.86C2.67 8.84 2 10.34 2 12c0 5.52 4.48 10 10 10 2.04 0 3.95-.61 5.56-1.66l-2.66-2.07c-1.35.81-2.93 1.28-4.56 1.28z" fill="#34A853"/>
+  <!-- Arco azul (derecha) -->
+  <path d="M19.74 11.76c.58.82.86 1.82.86 2.94 0 .64-.08 1.28-.24 1.88l3.1 2.41c1.26-2.04 2-4.48 2-7.02 0-5.52-4.48-10-10-10-1.87 0-3.63.52-5.14 1.43l2.86 2.86c1.28-.36 2.62-.57 4--.57 3.86 0 7.29 2.45 8.74 5.9h-3.58l-1.5-3.2h-3.84l1.5 3.2h3.58z" fill="#4285F4"/>
+  <!-- G blanca grande -->
+  <g transform="translate(12, 12)">
+    <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-size="10" font-weight="bold" fill="white" font-family="Arial">G</text>
+  </g>
+</svg>

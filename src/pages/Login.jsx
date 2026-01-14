@@ -9,7 +9,8 @@ function Login() {
     name: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    rememberMe: false
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -22,9 +23,10 @@ function Login() {
   }, [location.pathname]);
 
   const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [name]: type === 'checkbox' ? checked : value
     });
     setError(''); // Limpiar error al escribir
   };
@@ -70,49 +72,119 @@ function Login() {
     }
   };
 
+  const handleSocialLogin = (provider) => {
+    // Placeholder para integración social
+    console.log(`Iniciando sesión con ${provider}`);
+    setError(`Integración con ${provider} próximamente`);
+  };
+
   const isBlocked = false;
 
   return (
     <div className="login-page" style={{ 
-      minHeight: '80vh', 
+      minHeight: '100vh', 
       display: 'flex', 
       alignItems: 'center',
-      background: 'linear-gradient(135deg, var(--primary-bg-color) 0%, #fff 100%)'
+      justifyContent: 'center',
+      background: 'linear-gradient(135deg, #D4A373 0%, #E8C5A0 100%)',
+      padding: '2rem 1rem'
     }}>
-      <div className="container">
-        <div className="login-container" style={{
-          maxWidth: '450px',
-          margin: '0 auto',
-          padding: '2.5rem',
-          background: 'var(--white)',
-          borderRadius: '20px',
-          boxShadow: '0 10px 40px rgba(0,0,0,0.1)'
+      <div style={{
+        maxWidth: '480px',
+        width: '100%'
+      }}>
+        {/* Header con decoración y título */}
+        <div style={{
+          background: 'linear-gradient(135deg, #8B6F47 0%, #A0825A 100%)',
+          borderRadius: '25px 25px 0 0',
+          padding: '2.5rem 2rem',
+          textAlign: 'center',
+          position: 'relative',
+          overflow: 'hidden'
         }}>
-          <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-            <h1 style={{ 
-              fontFamily: 'Pacifico, cursive', 
-              color: 'var(--accent-chocolate)',
-              fontSize: '2.5rem',
-              marginBottom: '0.5rem'
-            }}>
-              {isRegistering ? 'Crear Cuenta' : 'Iniciar Sesión'}
-            </h1>
-            <p style={{ color: 'var(--primary-text-color)' }}>
-              Pastelería Mil Sabores
-            </p>
+          {/* Decoración de fondo */}
+          <div style={{
+            position: 'absolute',
+            top: '10px',
+            left: '20px',
+            opacity: '0.15',
+            fontSize: '4rem'
+          }}>
+            🎂
           </div>
+          <div style={{
+            position: 'absolute',
+            top: '15px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            opacity: '0.15',
+            fontSize: '4rem'
+          }}>
+            🧁
+          </div>
+          <div style={{
+            position: 'absolute',
+            top: '10px',
+            right: '20px',
+            opacity: '0.15',
+            fontSize: '4rem'
+          }}>
+            🍪
+          </div>
+
+          {/* Iconos decorativos principales */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: '2rem',
+            marginBottom: '1.5rem',
+            fontSize: '3rem'
+          }}>
+            <span style={{ animation: 'float 3s ease-in-out infinite' }}>🍰</span>
+            <span style={{ animation: 'float 3s ease-in-out infinite 0.5s' }}>🧁</span>
+            <span style={{ animation: 'float 3s ease-in-out infinite 1s' }}>🍪</span>
+          </div>
+
+          <h1 style={{ 
+            fontFamily: 'Pacifico, cursive', 
+            color: 'var(--accent-chocolate)',
+            fontSize: '2.5rem',
+            marginBottom: '0.5rem',
+            textShadow: '2px 2px 4px rgba(0,0,0,0.1)',
+            margin: '0.5rem 0'
+          }}>
+            {isRegistering ? 'Crear Cuenta' : 'Pastelería Mil Sabores'}
+          </h1>
+          <p style={{ 
+            color: 'rgba(255,255,255,0.9)',
+            fontSize: '1rem',
+            marginBottom: 0,
+            fontWeight: '500'
+          }}>
+            {isRegistering ? 'Únete a nuestra comunidad de amantes del buen gusto' : 'Los mejores postres artesanales te esperan'}
+          </p>
+        </div>
+
+        {/* Formulario */}
+        <div className="login-container" style={{
+          background: 'var(--white)',
+          borderRadius: '0 0 25px 25px',
+          padding: '2.5rem 2rem',
+          boxShadow: '0 20px 60px rgba(0,0,0,0.15)'
+        }}>
 
           {error && (
             <div style={{
-              padding: '1rem',
+              padding: '0.9rem 1rem',
               marginBottom: '1.5rem',
-              background: '#fee',
-              border: '1px solid #fcc',
-              borderRadius: '8px',
+              background: '#ffe0e0',
+              border: '2px solid #ff9999',
+              borderRadius: '10px',
               color: '#c33',
-              fontSize: '0.9rem'
+              fontSize: '0.9rem',
+              animation: 'slideDown 0.3s ease'
             }}>
-              {error}
+              ⚠️ {error}
             </div>
           )}
 
@@ -120,12 +192,15 @@ function Login() {
             {isRegistering && (
               <div style={{ marginBottom: '1.5rem' }}>
                 <label style={{ 
-                  display: 'block', 
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
                   marginBottom: '0.5rem',
                   fontWeight: '600',
-                  color: 'var(--primary-text-color)'
+                  color: 'var(--primary-text-color)',
+                  fontSize: '0.95rem'
                 }}>
-                  Nombre Completo
+                  👤 Nombre Completo
                 </label>
                 <input
                   type="text"
@@ -136,12 +211,16 @@ function Login() {
                   disabled={isBlocked || loading}
                   style={{
                     width: '100%',
-                    padding: '0.75rem 1rem',
-                    border: '2px solid var(--accent-pink)',
-                    borderRadius: '8px',
+                    padding: '0.85rem 1rem',
+                    border: '2px solid #E8D5C4',
+                    borderRadius: '12px',
                     fontSize: '1rem',
-                    transition: 'border-color 0.3s'
+                    transition: 'all 0.3s',
+                    boxSizing: 'border-box',
+                    fontFamily: 'inherit'
                   }}
+                  onFocus={(e) => e.target.style.borderColor = 'var(--accent-chocolate)'}
+                  onBlur={(e) => e.target.style.borderColor = '#E8D5C4'}
                   placeholder="Tu nombre completo"
                 />
               </div>
@@ -149,12 +228,15 @@ function Login() {
 
             <div style={{ marginBottom: '1.5rem' }}>
               <label style={{ 
-                display: 'block', 
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
                 marginBottom: '0.5rem',
                 fontWeight: '600',
-                color: 'var(--primary-text-color)'
+                color: 'var(--primary-text-color)',
+                fontSize: '0.95rem'
               }}>
-                Email
+                ✉️ Email o Usuario
               </label>
               <input
                 type="email"
@@ -165,26 +247,31 @@ function Login() {
                 disabled={isBlocked || loading}
                 style={{
                   width: '100%',
-                  padding: '0.75rem 1rem',
-                  border: '2px solid var(--accent-pink)',
-                  borderRadius: '8px',
-                  fontSize: '1rem'
+                  padding: '0.85rem 1rem',
+                  border: '2px solid #E8D5C4',
+                  borderRadius: '12px',
+                  fontSize: '1rem',
+                  transition: 'all 0.3s',
+                  boxSizing: 'border-box',
+                  fontFamily: 'inherit'
                 }}
+                onFocus={(e) => e.target.style.borderColor = 'var(--accent-chocolate)'}
+                onBlur={(e) => e.target.style.borderColor = '#E8D5C4'}
                 placeholder="tu@email.com"
               />
-              <small style={{ color: '#666', fontSize: '0.85rem', marginTop: '0.25rem', display: 'block' }}>
-                💡 Usa @admin.com para acceso de administrador
-              </small>
             </div>
 
             <div style={{ marginBottom: '1.5rem' }}>
               <label style={{ 
-                display: 'block', 
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
                 marginBottom: '0.5rem',
                 fontWeight: '600',
-                color: 'var(--primary-text-color)'
+                color: 'var(--primary-text-color)',
+                fontSize: '0.95rem'
               }}>
-                Contraseña
+                🔐 Contraseña
               </label>
               <input
                 type="password"
@@ -196,11 +283,16 @@ function Login() {
                 minLength={6}
                 style={{
                   width: '100%',
-                  padding: '0.75rem 1rem',
-                  border: '2px solid var(--accent-pink)',
-                  borderRadius: '8px',
-                  fontSize: '1rem'
+                  padding: '0.85rem 1rem',
+                  border: '2px solid #E8D5C4',
+                  borderRadius: '12px',
+                  fontSize: '1rem',
+                  transition: 'all 0.3s',
+                  boxSizing: 'border-box',
+                  fontFamily: 'inherit'
                 }}
+                onFocus={(e) => e.target.style.borderColor = 'var(--accent-chocolate)'}
+                onBlur={(e) => e.target.style.borderColor = '#E8D5C4'}
                 placeholder="Mínimo 6 caracteres"
               />
             </div>
@@ -208,12 +300,15 @@ function Login() {
             {isRegistering && (
               <div style={{ marginBottom: '1.5rem' }}>
                 <label style={{ 
-                  display: 'block', 
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
                   marginBottom: '0.5rem',
                   fontWeight: '600',
-                  color: 'var(--primary-text-color)'
+                  color: 'var(--primary-text-color)',
+                  fontSize: '0.95rem'
                 }}>
-                  Confirmar Contraseña
+                  🔐 Confirmar Contraseña
                 </label>
                 <input
                   type="password"
@@ -224,13 +319,65 @@ function Login() {
                   disabled={isBlocked || loading}
                   style={{
                     width: '100%',
-                    padding: '0.75rem 1rem',
-                    border: '2px solid var(--accent-pink)',
-                    borderRadius: '8px',
-                    fontSize: '1rem'
+                    padding: '0.85rem 1rem',
+                    border: '2px solid #E8D5C4',
+                    borderRadius: '12px',
+                    fontSize: '1rem',
+                    transition: 'all 0.3s',
+                    boxSizing: 'border-box',
+                    fontFamily: 'inherit'
                   }}
+                  onFocus={(e) => e.target.style.borderColor = 'var(--accent-chocolate)'}
+                  onBlur={(e) => e.target.style.borderColor = '#E8D5C4'}
                   placeholder="Repite tu contraseña"
                 />
+              </div>
+            )}
+
+            {!isRegistering && (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginBottom: '1.5rem'
+              }}>
+                <label style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  cursor: 'pointer',
+                  fontWeight: '500',
+                  color: 'var(--primary-text-color)',
+                  fontSize: '0.95rem'
+                }}>
+                  <input
+                    type="checkbox"
+                    name="rememberMe"
+                    checked={formData.rememberMe}
+                    onChange={handleChange}
+                    style={{
+                      cursor: 'pointer',
+                      width: '18px',
+                      height: '18px',
+                      accentColor: 'var(--accent-chocolate)'
+                    }}
+                  />
+                  Recuérdame
+                </label>
+                <Link
+                  to="/forgot-password"
+                  style={{
+                    color: 'var(--accent-chocolate)',
+                    textDecoration: 'none',
+                    fontSize: '0.95rem',
+                    fontWeight: '500',
+                    transition: 'all 0.3s'
+                  }}
+                  onMouseEnter={(e) => e.target.style.textDecoration = 'underline'}
+                  onMouseLeave={(e) => e.target.style.textDecoration = 'none'}
+                >
+                  ¿Olvidaste tu contraseña?
+                </Link>
               </div>
             )}
 
@@ -243,105 +390,223 @@ function Login() {
                 background: isBlocked || loading ? '#ccc' : 'var(--accent-chocolate)',
                 color: 'white',
                 border: 'none',
-                borderRadius: '8px',
+                borderRadius: '12px',
                 fontSize: '1.1rem',
                 fontWeight: '700',
                 cursor: isBlocked || loading ? 'not-allowed' : 'pointer',
-                transition: 'background 0.3s',
-                marginBottom: '1rem'
+                transition: 'all 0.3s',
+                marginBottom: '1.5rem',
+                boxShadow: isBlocked || loading ? 'none' : '0 4px 15px rgba(139, 69, 19, 0.3)',
+                transform: loading ? 'scale(0.98)' : 'scale(1)'
               }}
               onMouseOver={(e) => {
                 if (!isBlocked && !loading) {
                   e.target.style.background = 'var(--accent-chocolate-hover)';
+                  e.target.style.boxShadow = '0 6px 20px rgba(139, 69, 19, 0.4)';
+                  e.target.style.transform = 'translateY(-2px)';
                 }
               }}
               onMouseOut={(e) => {
                 if (!isBlocked && !loading) {
                   e.target.style.background = 'var(--accent-chocolate)';
+                  e.target.style.boxShadow = '0 4px 15px rgba(139, 69, 19, 0.3)';
+                  e.target.style.transform = 'translateY(0)';
                 }
               }}
             >
-              {loading ? 'Procesando...' : (isRegistering ? 'Crear Cuenta' : 'Iniciar Sesión')}
+              {loading ? '⏳ Procesando...' : (isRegistering ? '✨ Crear Cuenta' : '🔓 LOGIN')}
             </button>
 
-            <div style={{ textAlign: 'center' }}>
+            {/* Separador */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '1rem',
+              marginBottom: '1.5rem'
+            }}>
+              <div style={{ flex: 1, height: '1px', background: '#E8D5C4' }}></div>
+              <span style={{ color: '#999', fontSize: '0.9rem' }}>o también</span>
+              <div style={{ flex: 1, height: '1px', background: '#E8D5C4' }}></div>
+            </div>
+
+            {!isRegistering && (
+              <>
+                {/* Botones de redes sociales */}
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: '1rem',
+                  marginBottom: '1.5rem'
+                }}>
+                  <button
+                    type="button"
+                    onClick={() => handleSocialLogin('Google')}
+                    disabled={loading}
+                    style={{
+                      padding: '0.85rem',
+                      background: '#F5E6D3',
+                      border: '2px solid #E8D5C4',
+                      borderRadius: '12px',
+                      fontSize: '1rem',
+                      fontWeight: '600',
+                      cursor: loading ? 'not-allowed' : 'pointer',
+                      transition: 'all 0.3s',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.5rem',
+                      color: 'var(--primary-text-color)',
+                      opacity: loading ? 0.6 : 1
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!loading) {
+                        e.target.style.background = '#E8D5C4';
+                        e.target.style.transform = 'translateY(-2px)';
+                        e.target.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!loading) {
+                        e.target.style.background = '#F5E6D3';
+                        e.target.style.transform = 'translateY(0)';
+                        e.target.style.boxShadow = 'none';
+                      }
+                    }}
+                  >
+                    <img 
+                      src="https://cdn-icons-png.flaticon.com/512/300/300221.png" 
+                      alt="Google" 
+                      style={{ width: '24px', height: '24px', objectFit: 'contain' }} 
+                    />
+                    Google
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSocialLogin('Facebook')}
+                    disabled={loading}
+                    style={{
+                      padding: '0.85rem',
+                      background: '#F5E6D3',
+                      border: '2px solid #E8D5C4',
+                      borderRadius: '12px',
+                      fontSize: '1rem',
+                      fontWeight: '600',
+                      cursor: loading ? 'not-allowed' : 'pointer',
+                      transition: 'all 0.3s',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.5rem',
+                      color: 'var(--primary-text-color)',
+                      opacity: loading ? 0.6 : 1
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!loading) {
+                        e.target.style.background = '#E8D5C4';
+                        e.target.style.transform = 'translateY(-2px)';
+                        e.target.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!loading) {
+                        e.target.style.background = '#F5E6D3';
+                        e.target.style.transform = 'translateY(0)';
+                        e.target.style.boxShadow = 'none';
+                      }
+                    }}
+                  >
+                    <img 
+                      src="https://cdn-icons-png.flaticon.com/512/3670/3670144.png" 
+                      alt="Facebook" 
+                      style={{ width: '24px', height: '24px', objectFit: 'contain' }} 
+                    />
+                    Facebook
+                  </button>
+                </div>
+              </>
+            )}
+
+            {/* Enlace de registro/login */}
+            <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
               <button
                 type="button"
                 onClick={() => {
                   setIsRegistering(!isRegistering);
                   setError('');
-                  setFormData({ name: '', email: '', password: '', confirmPassword: '' });
+                  setFormData({ name: '', email: '', password: '', confirmPassword: '', rememberMe: false });
                 }}
                 style={{
                   background: 'none',
                   border: 'none',
                   color: 'var(--accent-chocolate)',
-                  textDecoration: 'underline',
+                  textDecoration: 'none',
                   cursor: 'pointer',
-                  fontSize: '0.95rem'
+                  fontSize: '0.95rem',
+                  fontWeight: '600',
+                  transition: 'all 0.3s'
                 }}
+                onMouseEnter={(e) => e.target.style.textDecoration = 'underline'}
+                onMouseLeave={(e) => e.target.style.textDecoration = 'none'}
               >
-                {isRegistering ? '¿Ya tienes cuenta? Inicia sesión' : '¿No tienes cuenta? Regístrate'}
+                {isRegistering ? '¿Ya tienes cuenta? Inicia sesión aquí' : '¿No tienes cuenta? Regístrate aquí'}
               </button>
+            </div>
+
+            {/* Link para volver */}
+            <div style={{ 
+              textAlign: 'center', 
+              paddingTop: '1rem', 
+              borderTop: '1px solid #E8D5C4'
+            }}>
+              <Link 
+                to="/"
+                style={{
+                  color: 'var(--accent-chocolate)',
+                  textDecoration: 'none',
+                  fontSize: '0.9rem',
+                  fontWeight: '500',
+                  transition: 'all 0.3s'
+                }}
+                onMouseEnter={(e) => e.target.style.textDecoration = 'underline'}
+                onMouseLeave={(e) => e.target.style.textDecoration = 'none'}
+              >
+                ← Volver al inicio
+              </Link>
             </div>
           </form>
 
-          {/* Información de usuarios de prueba */}
-          {!isRegistering && (
-            <div style={{
-              marginTop: '2rem',
-              padding: '1.5rem',
-              background: '#f0f8ff',
-              borderRadius: '10px',
-              border: '2px dashed var(--accent-pink)',
-              fontSize: '0.9rem'
-            }}>
-              <h4 style={{ 
-                margin: '0 0 1rem',
-                color: 'var(--accent-chocolate)',
-                fontSize: '1rem',
-                textAlign: 'center'
-              }}>
-                🧪 Usuarios de Prueba
-              </h4>
-              <div style={{ display: 'grid', gap: '0.75rem' }}>
-                <div style={{ padding: '0.75rem', background: 'white', borderRadius: '6px' }}>
-                  <strong style={{ color: 'var(--accent-chocolate)' }}>Cliente:</strong>
-                  <br />
-                  📧 cliente@email.com
-                  <br />
-                  🔑 123456
-                </div>
-                <div style={{ padding: '0.75rem', background: 'white', borderRadius: '6px' }}>
-                  <strong style={{ color: 'var(--accent-chocolate)' }}>Admin:</strong>
-                  <br />
-                  📧 admin@admin.com
-                  <br />
-                  🔑 admin123
-                </div>
-              </div>
-            </div>
-          )}
 
-          <div style={{ 
-            marginTop: '2rem', 
-            paddingTop: '1.5rem', 
-            borderTop: '1px solid #eee',
-            textAlign: 'center'
-          }}>
-            <Link 
-              to="/"
-              style={{
-                color: 'var(--accent-chocolate)',
-                textDecoration: 'none',
-                fontSize: '0.95rem'
-              }}
-            >
-              ← Volver al inicio
-            </Link>
-          </div>
         </div>
       </div>
+
+      <style>{`
+        @keyframes float {
+          0%, 100% {
+            transform: translateY(0px);
+          }
+          50% {
+            transform: translateY(-10px);
+          }
+        }
+
+        @keyframes slideDown {
+          from {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        /* Estilos responsivos */
+        @media (max-width: 480px) {
+          div[style*="maxWidth: '480px'"] {
+            margin: 0 !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }
